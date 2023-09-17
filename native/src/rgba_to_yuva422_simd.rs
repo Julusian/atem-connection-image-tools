@@ -1,4 +1,4 @@
-use std::simd::{f32x4, u32x4, u8x4, Simd};
+use std::simd::{f32x4, u32x4, Simd};
 
 pub struct YuvConstantsSimd {
   pub kr: Simd<f32, 4>,
@@ -100,11 +100,7 @@ pub fn rgb_to_yuv422_simd(constants: &YuvConstantsSimd, input: &[u8], target: &m
   let a1 = alpha_8_to_10bit(constants, &vec_a1);
   let a2 = alpha_8_to_10bit(constants, &vec_a2);
 
-  // write_result(constants, &a1, &cb16, &y16a, target);
-  // write_result(constants, &a2, &cr16, &y16b, &mut target[4..]);
-
   let block1 = combine_components(constants, &a1, &cb16, &y16a);
-  // let block1_array = block1.as_array();
   let block2 = combine_components(constants, &a2, &cr16, &y16b);
 
   for i in 0..4 {
@@ -166,33 +162,6 @@ fn to_simd_u32(input: &Simd<f32, 4>) -> Simd<u32, 4> {
     input[2] as u32,
     input[3] as u32,
   ])
-}
-
-#[inline(always)]
-fn write_result(
-  constants: &YuvConstantsSimd,
-  a: &Simd<f32, 4>,
-  uv: &Simd<f32, 4>,
-  y: &Simd<f32, 4>,
-  target: &mut [u8],
-) {
-  let a_u32 = to_simd_u32(a);
-  let uv_u32 = to_simd_u32(uv);
-  let y_u32 = to_simd_u32(y);
-
-  let b0 = a_u32 >> constants.splat4;
-  let b1 = ((a_u32 & constants.splat15) << constants.splat4) + (uv_u32 >> constants.splat6);
-  let b2 = ((uv_u32 & constants.splat255) << constants.splat2) + (y_u32 >> constants.splat8);
-  let b3 = y_u32;
-
-  for i in 0..4 {
-    let offset = i * 8;
-
-    target[offset] = b0[i] as u8;
-    target[offset + 1] = b1[i] as u8;
-    target[offset + 2] = b2[i] as u8;
-    target[offset + 3] = b3[i] as u8;
-  }
 }
 
 #[inline(always)]

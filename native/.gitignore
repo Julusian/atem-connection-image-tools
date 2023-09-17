@@ -197,3 +197,4 @@ Cargo.lock
 *.node
 
 perf.data*
+index.d.ts

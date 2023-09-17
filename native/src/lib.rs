@@ -1,12 +1,8 @@
 #![feature(portable_simd)]
 
-use constants::YuvConstants;
 use napi::{Env, JsBuffer, JsUndefined};
-use rgba_to_yuva422::rgb_to_yuv422;
 use rgba_to_yuva422_simd::{rgb_to_yuv422_simd, YuvConstantsSimd};
 
-mod constants;
-mod rgba_to_yuva422;
 mod rgba_to_yuva422_simd;
 
 #[macro_use]
@@ -61,21 +57,7 @@ pub fn convert_rgba_to_yuva_422(
   //   return env.get_undefined();
   // }
 
-  let constants = YuvConstants::create(kr, kb);
-
   let sample_count = pixel_count / 2;
-  // for i in 0..sample_count {
-  //   let offset = i * 8;
-
-  //   let offset4 = offset + 4;
-  //   let offset8 = offset + 8;
-  //   rgb_to_yuv422(
-  //     &constants,
-  //     &input_vec[offset..offset4],
-  //     &input_vec[offset4..offset8],
-  //     &mut output_vec[offset..offset8],
-  //   );
-  // }
 
   let constants_simd = YuvConstantsSimd::create(kr, kb);
 
@@ -90,27 +72,6 @@ pub fn convert_rgba_to_yuva_422(
       &mut output_vec[offset_start..offset_end],
     );
   }
-
-  // let row_batch_count = (height / 4) as usize;
-  // for i in 0..row_batch_count {
-  //   let offset_row1 = (i * 4 + 0) * row_batch_count;
-  //   let offset_row2 = (i * 4 + 1) * row_batch_count;
-  //   let offset_row3 = (i * 4 + 2) * row_batch_count;
-  //   let offset_row4 = (i * 4 + 3) * row_batch_count;
-  //   let offset_row_end = (i * 4 + 4) * row_batch_count;
-
-  //   rgb_to_yuv422_row(
-  //     &constants,
-  //     &input_vec[offset_row1..offset_row2],
-  //     &input_vec[offset_row2..offset_row3],
-  //     &input_vec[offset_row3..offset_row4],
-  //     &input_vec[offset_row4..offset_row_end],
-  //     &mut output_vec[offset_row1..offset_row2],
-  //     &mut output_vec[offset_row2..offset_row3],
-  //     &mut output_vec[offset_row3..offset_row4],
-  //     &mut output_vec[offset_row4..offset_row_end],
-  //   );
-  // }
 
   env.get_undefined()
 }
