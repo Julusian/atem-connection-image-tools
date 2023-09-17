@@ -38,7 +38,11 @@ jobs:
         run: yarn lint
 
       - name: Cargo fmt
-        run: cargo fmt -- --check
+        run: |
+          cd native
+          cargo fmt -- --check
 
       - name: Clippy
-        run: cargo clippy
+        run: |
+          cd native
+          cargo clippy
