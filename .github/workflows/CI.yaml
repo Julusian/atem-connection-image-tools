@@ -28,9 +28,11 @@ jobs:
             build: |
               yarn build
               strip -x *.node
+
           - host: windows-latest
             build: yarn build
             target: x86_64-pc-windows-msvc
+
           - host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
@@ -38,11 +40,17 @@ jobs:
               set -e &&
               yarn build:rs --target x86_64-unknown-linux-gnu &&
               strip *.node
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
+            build: set -e && yarn build && strip *.node
+
           - host: macos-latest
             target: aarch64-apple-darwin
             build: |
               yarn build:rs --target aarch64-apple-darwin
               strip -x *.node
+
           - host: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-aarch64
@@ -50,6 +58,14 @@ jobs:
               set -e &&
               yarn build:rs --target aarch64-unknown-linux-gnu &&
               aarch64-unknown-linux-gnu-strip *.node
+          - host: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+            setup: |
+              sudo apt-get update
+              sudo apt-get install gcc-arm-linux-gnueabihf -y
+            build: |
+              yarn build --target armv7-unknown-linux-gnueabihf
+              arm-linux-gnueabihf-strip *.node
 
     name: Build - ${{ matrix.settings.target }} - node@18
     runs-on: ${{ matrix.settings.host }}
@@ -128,6 +144,8 @@ jobs:
         settings:
           - host: windows-latest
             target: x86_64-pc-windows-msvc
+          - host: macos-latest
+            target: x86_64-apple-darwin
         node:
           - '14'
           - '16'
