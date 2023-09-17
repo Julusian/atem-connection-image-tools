@@ -3,7 +3,6 @@ env:
   DEBUG: napi:*
   APP_NAME: sofie-atem-connection-image-tools
   MACOSX_DEPLOYMENT_TARGET: '10.13'
-  TOOLCHAIN: 'nightly-2023-08-23'
 'on':
   push:
     branches:
@@ -43,7 +42,7 @@ jobs:
           - host: ubuntu-latest
             target: x86_64-unknown-linux-musl
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
-            build: set -e && yarn build && strip *.node
+            build: set -e && yarn build:rs && strip *.node
 
           - host: macos-latest
             target: aarch64-apple-darwin
@@ -64,7 +63,7 @@ jobs:
               sudo apt-get update
               sudo apt-get install gcc-arm-linux-gnueabihf -y
             build: |
-              yarn build --target armv7-unknown-linux-gnueabihf
+              yarn build:rs --target armv7-unknown-linux-gnueabihf
               arm-linux-gnueabihf-strip *.node
 
     name: Build - ${{ matrix.settings.target }} - node@18
@@ -82,7 +81,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         if: ${{ !matrix.settings.docker }}
         with:
-          toolchain: '${{ env.TOOLCHAIN }}'
+          toolchain: 'nightly-2023-08-23'
           targets: ${{ matrix.settings.target }}
       - name: Cache cargo
         uses: actions/cache@v3
