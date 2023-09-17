@@ -35,19 +35,19 @@ jobs:
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
             build: |-
               set -e &&
-              yarn build --target x86_64-unknown-linux-gnu &&
+              yarn build:rs --target x86_64-unknown-linux-gnu &&
               strip *.node
           - host: macos-latest
             target: aarch64-apple-darwin
             build: |
-              yarn build --target aarch64-apple-darwin
+              yarn build:rs --target aarch64-apple-darwin
               strip -x *.node
           - host: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-aarch64
             build: |-
               set -e &&
-              yarn build --target aarch64-unknown-linux-gnu &&
+              yarn build:rs --target aarch64-unknown-linux-gnu &&
               aarch64-unknown-linux-gnu-strip *.node
 
     name: stable - ${{ matrix.settings.target }} - node@18
@@ -151,7 +151,9 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: yarn unit
+        run: |
+          yarn build:js
+          yarn unit
 
   test-linux-x64-gnu-binding:
     name: Test bindings on Linux-x64-gnu - node@${{ matrix.node }}
@@ -184,7 +186,7 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim yarn unit
+        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim yarn build:js && yarn unit
 
   test-linux-aarch64-gnu-binding:
     name: Test bindings on aarch64-unknown-linux-gnu - node@${{ matrix.node }}
@@ -225,6 +227,7 @@ jobs:
           options: '--platform linux/arm64 -v ${{ github.workspace }}:/build -w /build'
           run: |
             set -e
+            yarn build:js
             yarn unit
             ls -la
 
