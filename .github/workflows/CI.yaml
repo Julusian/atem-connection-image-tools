@@ -34,7 +34,7 @@ jobs:
           - host: windows-latest
             build: |
               yarn build:rs --target i686-pc-windows-msvc	
-              yarn test
+              yarn unit
             target: i686-pc-windows-msvc
 
           - host: ubuntu-latest
