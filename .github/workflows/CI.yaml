@@ -3,6 +3,7 @@ env:
   DEBUG: napi:*
   APP_NAME: sofie-atem-connection-image-tools
   MACOSX_DEPLOYMENT_TARGET: '10.13'
+  TOOLCHAIN: nightly-2023-08-23
 'on':
   push:
     branches:
@@ -50,7 +51,7 @@ jobs:
               yarn build:rs --target aarch64-unknown-linux-gnu &&
               aarch64-unknown-linux-gnu-strip *.node
 
-    name: stable - ${{ matrix.settings.target }} - node@18
+    name: Build - ${{ matrix.settings.target }} - node@18
     runs-on: ${{ matrix.settings.host }}
     steps:
       - uses: actions/checkout@v3
@@ -62,10 +63,10 @@ jobs:
           check-latest: true
           cache: yarn
       - name: Install
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
         if: ${{ !matrix.settings.docker }}
         with:
-          toolchain: stable
+          toolchain: ${{ env.TOOLCHAIN }}
           targets: ${{ matrix.settings.target }}
       - name: Cache cargo
         uses: actions/cache@v3
@@ -78,7 +79,7 @@ jobs:
             target/
           key: ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}
       - uses: goto-bus-stop/setup-zig@v2
-        if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' }}
+        if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
         with:
           version: 0.10.1
       - name: Setup toolchain
