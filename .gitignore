@@ -183,7 +183,7 @@ $RECYCLE.BIN/
 
 #Added by cargo
 
-/target
+/native/target
 Cargo.lock
 
 .pnp.*
@@ -197,3 +197,4 @@ Cargo.lock
 *.node
 
 perf.data*
+nativeLib.d.ts

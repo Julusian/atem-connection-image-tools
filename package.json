@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "yarn build:rs && yarn build:js",
-    "build:rs": "napi build --cargo-cwd native --platform --release  --js=false --dts index.d.ts .",
+    "build:rs": "napi build --cargo-cwd native --platform --release  --js=false --dts nativeLib.d.ts .",
     "build:rs:debug": "napi build --cargo-cwd native --platform rust",
     "build:js": "rimraf dist && run build:main",
     "build:main": "tsc -p tsconfig.build.json",
@@ -33,14 +33,16 @@
     "lint-staged": "./node_modules/.bin/lint-staged"
   },
   "engines": {
-    "node": "^14.18 || ^16.14 || ^18.0"
+    "node": "^14.18 || ^16.14 || >=18.0"
   },
   "files": [
     "/dist",
     "/assets",
     "/CHANGELOG.md",
     "/README.md",
-    "/LICENSE"
+    "/LICENSE",
+    "prebuilds",
+    "nativeLib.*"
   ],
   "devDependencies": {
     "@napi-rs/cli": "^2.16.3",
