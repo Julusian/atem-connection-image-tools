@@ -1,6 +1,6 @@
 {
   "name": "@atem-connection/image-tools",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Native tools for atem-connection",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
