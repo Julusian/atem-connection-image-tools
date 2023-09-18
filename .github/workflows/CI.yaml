@@ -299,7 +299,7 @@ jobs:
           run: |
             set -e
             yarn build:js
-            yarn unit
+            yarn unit:js
             ls -la
 
   publish:
