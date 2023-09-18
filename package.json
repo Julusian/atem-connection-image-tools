@@ -5,6 +5,14 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/julusian/atem-connection-image-tools.git"
+  },
+  "bugs": {
+    "url": "https://github.com/julusian/atem-connection-image-tools/issues"
+  },
+  "homepage": "https://github.com/julusian/atem-connection-image-tools#readme",
   "maintainers": [
     {
       "name": "Julian Waller",
@@ -20,7 +28,9 @@
     "lint:raw": "run eslint --ext .ts --ext .js --ext .tsx --ext .jsx ",
     "lint": "run lint:raw .",
     "lint-fix": "run lint --fix",
-    "unit": "run jest --forceExit",
+    "unit": "run unit:js",
+    "unit:js": "run jest --forceExit",
+    "unit:rs": "cd native && cargo test",
     "test": "run lint && run unit",
     "watch": "run jest --watch",
     "release": "sofie-version",
