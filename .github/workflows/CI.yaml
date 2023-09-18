@@ -325,6 +325,10 @@ jobs:
           path: artifacts
       - name: Move artifacts
         run: |
+          # take a copy of one of the `nativeLib.d.ts` files
+          mv artifacts/bindings-x86_64-unknown-linux-gnu/nativeLib.d.ts ./
+          rm artifacts/*/nativeLib.d.ts
+
           mkdir prebuilds
           mv artifacts/*/* prebuilds/
         shell: bash

@@ -2,8 +2,8 @@
   "name": "@atem-connection/image-tools",
   "version": "0.0.1",
   "description": "Native tools for atem-connection",
-  "main": "index.js",
-  "typings": "index.d.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "license": "MIT",
   "maintainers": [
     {
