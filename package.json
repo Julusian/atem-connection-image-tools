@@ -28,7 +28,7 @@
     "lint:raw": "run eslint --ext .ts --ext .js --ext .tsx --ext .jsx ",
     "lint": "run lint:raw .",
     "lint-fix": "run lint --fix",
-    "unit": "run unit:js",
+    "unit": "run unit:js && run unit:rs",
     "unit:js": "run jest --forceExit",
     "unit:rs": "cd native && cargo test",
     "test": "run lint && run unit",

@@ -3,12 +3,13 @@ env:
   DEBUG: napi:*
   APP_NAME: sofie-atem-connection-image-tools
   MACOSX_DEPLOYMENT_TARGET: '10.13'
-'on':
+
+on:
   push:
     branches:
-      - main
-    tags-ignore:
       - '**'
+    tags:
+      - 'v*'
     paths-ignore:
       - '**/*.md'
       - LICENSE
@@ -16,6 +17,7 @@ env:
       - .editorconfig
       - docs/**
   pull_request: null
+
 jobs:
   build:
     strategy:
