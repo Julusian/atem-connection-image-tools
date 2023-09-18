@@ -1,6 +1,6 @@
 # Sofie: The Modern TV News Studio Automation System (ATEM connection image tools)
 
-[![Node CI](https://github.com/julusian/atem-connection-image-tools/actions/workflows/node.yaml/badge.svg)](https://github.com/julusian/atem-connection-image-tools/actions/workflows/node.yaml)
+[![Node CI](https://github.com/julusian/atem-connection-image-tools/actions/workflows/CI.yaml/badge.svg)](https://github.com/julusian/atem-connection-image-tools/actions/workflows/CI.yaml)
 [![npm](https://img.shields.io/npm/v/@atem-connection/image-tools)](https://www.npmjs.com/package/@atem-connection/image-tools)
 
 ## Usage
