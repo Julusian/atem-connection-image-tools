@@ -301,7 +301,7 @@ jobs:
             ls -la
 
   publish:
-    name: Publish
+    name: Release
     runs-on: ubuntu-latest
     needs:
       - build
@@ -309,6 +309,10 @@ jobs:
       - test-linux-x64-gnu-binding
       - test-linux-x64-musl-binding
       - test-linux-aarch64-gnu-binding
+
+    # only run for tags
+    if: contains(github.ref, 'refs/tags/')
+
     steps:
       - uses: actions/checkout@v4
       - name: Setup node
@@ -332,19 +336,47 @@ jobs:
           mkdir prebuilds
           mv artifacts/*/* prebuilds/
         shell: bash
-      - name: Publish
+      - name: Check release is desired
+        id: do-publish
         run: |
-          if git log -1 --pretty=%B | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+$";
-          then
-            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-            npm publish --access public
-          elif git log -1 --pretty=%B | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+";
-          then
-            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-            npm publish --tag next --access public
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "No Token"
           else
-            echo "Not a release, skipping publish"
+
+            PUBLISHED_VERSION=$(yarn npm info --json . | jq -c '.version' -r)
+            THIS_VERSION=$(node -p "require('./package.json').version")
+            # Simple bash helper to comapre version numbers
+            verlte() {
+              [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
+            }
+            verlt() {
+              [ "$1" = "$2" ] && return 1 || verlte $1 $2
+            }
+            if verlt $PUBLISHED_VERSION $THIS_VERSION
+            then
+              echo "Publishing latest"
+              echo "tag=latest" >> $GITHUB_OUTPUT
+            else
+              echo "Publishing hotfix"
+              echo "tag=hotfix" >> $GITHUB_OUTPUT
+            fi
+
           fi
+      - name: Build typescript
+        if: ${{ steps.do-publish.outputs.tag }}
+        run: |
+          yarn build:js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          CI: true
+      - name: Publish to NPM
+        if: ${{ steps.do-publish.outputs.tag }}
+        run: |
+          yarn config set npmAuthToken $NPM_AUTH_TOKEN
+
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          yarn npm publish --access=public --tag ${{ steps.do-publish.outputs.tag }}
+
+          echo "**Published:** $NEW_VERSION" >> $GITHUB_STEP_SUMMARY
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          CI: true
