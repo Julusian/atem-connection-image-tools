@@ -54,20 +54,17 @@ pub fn convert_rgba_to_yuva_422(
     [0.299, 0.114] // BT.601
   };
 
-  // // TODO _ HACK
-  // if height % 4 != 0 {
-  //   env.throw_error("Output buffer has incorrect length", None)?;
-  //   return env.get_undefined();
-  // }
+  if pixel_count % 32 != 0 {
+    env.throw_error("Output buffer has incorrect length", None)?;
+    return env.create_uint32(0);
+  }
 
   let sample_count = pixel_count / 2;
 
   let constants_simd = YuvConstantsSimd::create(kr, kb);
 
-  // let mut current_value = None;
-  let mut rle_encoder: Option<RLEEncoder> = None;
-
   let perform_rle = true; // TODO
+  let mut rle_encoder = RLEEncoder::create(&mut output_vec, perform_rle);
 
   let batch_count = sample_count / 4;
   for i in 0..batch_count {
@@ -77,34 +74,11 @@ pub fn convert_rgba_to_yuva_422(
     let (word1, word2, word3, word4) =
       rgb_to_yuv422_simd(&constants_simd, &input_vec[offset_start..offset_end]);
 
-    // if perform_rle {
-    if let Some(rle_encoder) = &mut rle_encoder {
-      rle_encoder.add_word(word1);
-      rle_encoder.add_word(word2);
-      rle_encoder.add_word(word3);
-      rle_encoder.add_word(word4);
-    } else {
-      let mut new_encoder = RLEEncoder::create(&mut output_vec, word1, perform_rle);
-      new_encoder.add_word(word2);
-      new_encoder.add_word(word3);
-      new_encoder.add_word(word4);
-      rle_encoder = Some(new_encoder);
-    }
-    // } else {
-    //   // No RLE, so copy all output
-    //   copy_all(
-    //     &mut output_vec[offset_start..offset_end],
-    //     &word1,
-    //     &word2,
-    //     &word3,
-    //     &word4,
-    //   );
-    // }
+    rle_encoder.add_word(word1);
+    rle_encoder.add_word(word2);
+    rle_encoder.add_word(word3);
+    rle_encoder.add_word(word4);
   }
 
-  if let Some(rle_encoder) = rle_encoder {
-    env.create_uint32(rle_encoder.finish())
-  } else {
-    env.create_uint32(0)
-  }
+  env.create_uint32(rle_encoder.finish())
 }

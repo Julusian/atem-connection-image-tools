@@ -187,7 +187,7 @@ fn combine_components(
 
 #[cfg(test)]
 mod tests {
-  use crate::util::copy_all;
+  use crate::util::copy_word;
 
   // Note this useful idiom: importing names from outer (for mod tests) scope.
   use super::*;
@@ -203,7 +203,10 @@ mod tests {
 
     let mut target = [0; 32];
     let (word1, word2, word3, word4) = rgb_to_yuv422_simd(&bt601_constants, &input_ext);
-    copy_all(&mut target, &word1, &word2, &word3, &word4);
+    copy_word(&mut target, &word1);
+    copy_word(&mut target[8..], &word2);
+    copy_word(&mut target[16..], &word3);
+    copy_word(&mut target[24..], &word4);
 
     let mut target_trimmed = [0; 8];
     target_trimmed.copy_from_slice(&target[0..8]);
