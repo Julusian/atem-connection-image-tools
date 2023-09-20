@@ -1,5 +1,7 @@
 use std::simd::{f32x4, u32x4, Simd};
 
+use crate::util::Word64Bit;
+
 pub struct YuvConstantsSimd {
   pub kr: Simd<f32, 4>,
   pub kb: Simd<f32, 4>,
@@ -72,7 +74,13 @@ fn f32x4_from_u8(v1: u8, v2: u8, v3: u8, v4: u8) -> Simd<f32, 4> {
 }
 
 #[inline(always)]
-pub fn rgb_to_yuv422_simd(constants: &YuvConstantsSimd, input: &[u8], target: &mut [u8]) {
+pub fn rgb_to_yuv422_simd(
+  constants: &YuvConstantsSimd,
+  input: &[u8],
+  // target: &mut [u8],
+  // perform_rle: bool,
+  // previous_target: Option<&[u8]>,
+) -> (Word64Bit, Word64Bit, Word64Bit, Word64Bit) {
   let rgba1_1 = &input[0..4];
   let rgba1_2 = &input[4..8];
   let rgba2_1 = &input[8..12];
@@ -103,14 +111,12 @@ pub fn rgb_to_yuv422_simd(constants: &YuvConstantsSimd, input: &[u8], target: &m
   let block1 = combine_components(constants, &a1, &cb16, &y16a);
   let block2 = combine_components(constants, &a2, &cr16, &y16b);
 
-  for i in 0..4 {
-    let offset = i * 8;
-    let offset4 = offset + 4;
-    let offset8 = offset + 8;
+  let word1 = (block1[0].to_be_bytes(), block2[0].to_be_bytes());
+  let word2 = (block1[1].to_be_bytes(), block2[1].to_be_bytes());
+  let word3 = (block1[2].to_be_bytes(), block2[2].to_be_bytes());
+  let word4 = (block1[3].to_be_bytes(), block2[3].to_be_bytes());
 
-    target[offset..offset4].copy_from_slice(&block1[i].to_be_bytes());
-    target[offset4..offset8].copy_from_slice(&block2[i].to_be_bytes())
-  }
+  (word1, word2, word3, word4)
 }
 
 #[inline(always)]
@@ -181,6 +187,8 @@ fn combine_components(
 
 #[cfg(test)]
 mod tests {
+  use crate::util::copy_all;
+
   // Note this useful idiom: importing names from outer (for mod tests) scope.
   use super::*;
 
@@ -194,7 +202,8 @@ mod tests {
     input_ext[24..32].copy_from_slice(input);
 
     let mut target = [0; 32];
-    rgb_to_yuv422_simd(&bt601_constants, &input_ext, &mut target);
+    let (word1, word2, word3, word4) = rgb_to_yuv422_simd(&bt601_constants, &input_ext);
+    copy_all(&mut target, &word1, &word2, &word3, &word4);
 
     let mut target_trimmed = [0; 8];
     target_trimmed.copy_from_slice(&target[0..8]);
