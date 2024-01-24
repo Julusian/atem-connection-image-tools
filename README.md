@@ -1,4 +1,4 @@
-# Sofie: The Modern TV News Studio Automation System (ATEM connection image tools)
+# ATEM connection image tools
 
 [![Node CI](https://github.com/julusian/atem-connection-image-tools/actions/workflows/CI.yaml/badge.svg)](https://github.com/julusian/atem-connection-image-tools/actions/workflows/CI.yaml)
 [![npm](https://img.shields.io/npm/v/@atem-connection/image-tools)](https://www.npmjs.com/package/@atem-connection/image-tools)
@@ -19,8 +19,12 @@ const conn = new Atem()
 const file = fs.readFileSync('./testframe.rgba')
 
 const encodedImage = encodeImageForAtem(1920, 1080, file, 'rgba')
-
 conn.uploadStill(0, encodedImage, 'Test image', '').then(() => {
+	console.log('Uploaded!')
+})
+
+// Or the less efficient method, with 'atem-connection' performing the colour conversion:
+conn.uploadStill(1, file, 'Test image', '').then(() => {
 	console.log('Uploaded!')
 })
 ```
