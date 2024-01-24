@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "sofie-atem-connection-image-tools"
+name = "atem-connection-image-tools"
 version = "0.0.0"
 
 [lib]

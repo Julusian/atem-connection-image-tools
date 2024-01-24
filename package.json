@@ -75,7 +75,7 @@
     ]
   },
   "napi": {
-    "name": "sofie-atem-connection-image-tools",
+    "name": "atem-connection-image-tools",
     "triples": {
       "additional": [
         "aarch64-apple-darwin",
