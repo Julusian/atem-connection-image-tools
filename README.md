@@ -5,7 +5,25 @@
 
 ## Usage
 
-This library is not intended to be used directly, but as part of atem-connection [NPM](https://www.npmjs.com/package/atem-connection) [Github](https://github.com/nrkno/sofie-atem-connection). It provides some image utilities with both compiled (rust) and javascript implementations.
+This library is intended to be used as optional optimisations for atem-connection [NPM](https://www.npmjs.com/package/atem-connection) [Github](https://github.com/nrkno/sofie-atem-connection). It provides some image utilities with compiled (rust) implementations, which can be used instead of the javascript implementations used elsewhere.
+
+### Example:
+
+```ts
+import { Atem } from 'atem-connection'
+import * as fs from 'fs'
+import { encodeImageForAtem } from '@atem-connection/image-tools'
+
+const conn = new Atem()
+
+const file = fs.readFileSync('./testframe.rgba')
+
+const encodedImage = encodeImageForAtem(1920, 1080, file, 'rgba')
+
+conn.uploadStill(0, encodedImage, 'Test image', '').then(() => {
+	console.log('Uploaded!')
+})
+```
 
 ## Development
 

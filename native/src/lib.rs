@@ -24,7 +24,7 @@ pub fn convert_rgba_to_yuva_422(
   input: JsBuffer,
   output: JsBuffer,
 ) -> napi::Result<JsUndefined> {
-  // @todo: BALTE - 2018-5-24:
+  // @todo: MINT - 2018-5-24:
   // Create util functions that handle proper colour spaces in UHD.
 
   let input_vec = input.into_value()?;
