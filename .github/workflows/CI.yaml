@@ -27,7 +27,7 @@ jobs:
           - host: macos-latest
             target: x86_64-apple-darwin
             build: |
-              yarn build
+              yarn build:rs --target x86_64-apple-darwin
               strip -x *.node
 
           - host: windows-latest
@@ -54,11 +54,6 @@ jobs:
           - host: macos-latest
             target: aarch64-apple-darwin
             build: |
-              sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*;	
-              export CC=$(xcrun -f clang);	
-              export CXX=$(xcrun -f clang++);	
-              SYSROOT=$(xcrun --sdk macosx --show-sdk-path);	
-              export CFLAGS="-isysroot $SYSROOT -isystem $SYSROOT";
               yarn build:rs --target aarch64-apple-darwin
               strip -x *.node
 
@@ -159,7 +154,7 @@ jobs:
           - host: windows-latest
             target: x86_64-pc-windows-msvc
           - host: macos-latest
-            target: x86_64-apple-darwin
+            target: aarch64-apple-darwin
         node:
           - '16'
           - '18'
