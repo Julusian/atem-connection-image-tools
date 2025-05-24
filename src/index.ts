@@ -77,9 +77,7 @@ export function encodeImageForAtem(
 }
 
 export function decodeImageFromAtem(width: number, height: number, data: Buffer): Buffer {
-	const expectedLength = width * height * 4
-	if (data.length !== expectedLength)
-		throw new Error(`Pixel buffer has incorrect length. Received ${data.length} expected ${expectedLength}`)
+	// RLE means the input data could have any length, we can't check that here
 
 	return convertYUV422ToRGBA(width, height, data)
 }

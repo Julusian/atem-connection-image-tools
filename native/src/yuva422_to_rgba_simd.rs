@@ -2,15 +2,22 @@ use crate::yuv_constants::YuvConstantsSimd;
 use std::simd::{num::SimdFloat, num::SimdUint, u32x4, Simd, StdFloat};
 
 #[inline(always)]
-pub fn yuva422_to_rgb_simd(constants: &YuvConstantsSimd, input: &[u8], target: &mut [u8]) {
-  let ycba1_1 = u32::from_be_bytes((&input[0..4]).try_into().unwrap());
-  let ycra1_2 = u32::from_be_bytes((&input[4..8]).try_into().unwrap());
-  let ycba2_1 = u32::from_be_bytes((&input[8..12]).try_into().unwrap());
-  let ycra2_2 = u32::from_be_bytes((&input[12..16]).try_into().unwrap());
-  let ycba3_1 = u32::from_be_bytes((&input[16..20]).try_into().unwrap());
-  let ycra3_2 = u32::from_be_bytes((&input[20..24]).try_into().unwrap());
-  let ycba4_1 = u32::from_be_bytes((&input[24..28]).try_into().unwrap());
-  let ycra4_2 = u32::from_be_bytes((&input[28..32]).try_into().unwrap());
+pub fn yuva422_to_rgb_simd(
+  constants: &YuvConstantsSimd,
+  sample1: &[u8],
+  sample2: &[u8],
+  sample3: &[u8],
+  sample4: &[u8],
+  target: &mut [u8],
+) {
+  let ycba1_1 = u32::from_be_bytes((&sample1[0..4]).try_into().unwrap());
+  let ycra1_2 = u32::from_be_bytes((&sample1[4..8]).try_into().unwrap());
+  let ycba2_1 = u32::from_be_bytes((&sample2[0..4]).try_into().unwrap());
+  let ycra2_2 = u32::from_be_bytes((&sample2[4..8]).try_into().unwrap());
+  let ycba3_1 = u32::from_be_bytes((&sample3[0..4]).try_into().unwrap());
+  let ycra3_2 = u32::from_be_bytes((&sample3[4..8]).try_into().unwrap());
+  let ycba4_1 = u32::from_be_bytes((&sample4[0..4]).try_into().unwrap());
+  let ycra4_2 = u32::from_be_bytes((&sample4[4..8]).try_into().unwrap());
 
   let vec_ycba = u32x4::from_array([ycba1_1, ycba2_1, ycba3_1, ycba4_1]);
   let vec_ycra = u32x4::from_array([ycra1_2, ycra2_2, ycra3_2, ycra4_2]);
@@ -94,14 +101,8 @@ mod tests {
   fn yuva422_to_rgb_single(input: &[u8; 8]) -> [u8; 8] {
     let bt601_constants = YuvConstantsSimd::create(0.299, 0.114);
 
-    let mut input_ext = [0; 32];
-    input_ext[0..8].copy_from_slice(input);
-    input_ext[8..16].copy_from_slice(input);
-    input_ext[16..24].copy_from_slice(input);
-    input_ext[24..32].copy_from_slice(input);
-
     let mut target = [0; 32];
-    yuva422_to_rgb_simd(&bt601_constants, &input_ext, &mut target);
+    yuva422_to_rgb_simd(&bt601_constants, input, input, input, input, &mut target);
 
     let mut target_trimmed = [0; 8];
     target_trimmed.copy_from_slice(&target[0..8]);
