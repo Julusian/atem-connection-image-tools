@@ -35,8 +35,8 @@ pub fn convert_rgba_to_yuva_422(
   let mut output_vec = output.into_value()?;
 
   let pixel_count = (width * height) as usize;
-  if width % 2 != 0 {
-    env.throw_error("Width must be a multiple of 2", None)?;
+  if width % 8 != 0 {
+    env.throw_error("Width must be a multiple of 8", None)?;
     return env.get_undefined();
   }
   let byte_count = pixel_count * 4;
@@ -54,12 +54,6 @@ pub fn convert_rgba_to_yuva_422(
   } else {
     [0.299, 0.114] // BT.601
   };
-
-  // // TODO _ HACK
-  // if height % 4 != 0 {
-  //   env.throw_error("Output buffer has incorrect length", None)?;
-  //   return env.get_undefined();
-  // }
 
   let sample_count = pixel_count / 2;
 
@@ -103,8 +97,8 @@ pub fn convert_yuva_422_to_rgba(
   let mut output_vec = output.into_value()?;
 
   let pixel_count = (width * height) as usize;
-  if width % 2 != 0 {
-    env.throw_error("Width must be a multiple of 2", None)?;
+  if width % 8 != 0 {
+    env.throw_error("Width must be a multiple of 8", None)?;
     return env.get_undefined();
   }
   let byte_count = pixel_count * 4;
@@ -122,12 +116,6 @@ pub fn convert_yuva_422_to_rgba(
   } else {
     [0.299, 0.114] // BT.601
   };
-
-  // // TODO _ HACK
-  // if height % 4 != 0 {
-  //   env.throw_error("Output buffer has incorrect length", None)?;
-  //   return env.get_undefined();
-  // }
 
   let sample_count = pixel_count / 2;
 
