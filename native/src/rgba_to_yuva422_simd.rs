@@ -1,27 +1,17 @@
-use crate::util::{f32x4_from_u8, to_simd_u32};
 use crate::yuv_constants::YuvConstantsSimd;
-use std::simd::Simd;
+use std::simd::{Simd, SimdFloat, SimdUint};
 
 #[inline(always)]
 pub fn rgb_to_yuva422_simd(constants: &YuvConstantsSimd, input: &[u8], target: &mut [u8]) {
-  let rgba1_1 = &input[0..4];
-  let rgba1_2 = &input[4..8];
-  let rgba2_1 = &input[8..12];
-  let rgba2_2 = &input[12..16];
-  let rgba3_1 = &input[16..20];
-  let rgba3_2 = &input[20..24];
-  let rgba4_1 = &input[24..28];
-  let rgba4_2 = &input[28..32];
+  let vec_r1 = Simd::gather_or_default(input, constants.gather_idx).cast::<f32>();
+  let vec_g1 = Simd::gather_or_default(&input[1..], constants.gather_idx).cast::<f32>();
+  let vec_b1 = Simd::gather_or_default(&input[2..], constants.gather_idx).cast::<f32>();
+  let vec_a1 = Simd::gather_or_default(&input[3..], constants.gather_idx).cast::<f32>();
 
-  let vec_r1 = f32x4_from_u8(rgba1_1[0], rgba2_1[0], rgba3_1[0], rgba4_1[0]);
-  let vec_g1 = f32x4_from_u8(rgba1_1[1], rgba2_1[1], rgba3_1[1], rgba4_1[1]);
-  let vec_b1 = f32x4_from_u8(rgba1_1[2], rgba2_1[2], rgba3_1[2], rgba4_1[2]);
-  let vec_a1 = f32x4_from_u8(rgba1_1[3], rgba2_1[3], rgba3_1[3], rgba4_1[3]);
-
-  let vec_r2 = f32x4_from_u8(rgba1_2[0], rgba2_2[0], rgba3_2[0], rgba4_2[0]);
-  let vec_g2 = f32x4_from_u8(rgba1_2[1], rgba2_2[1], rgba3_2[1], rgba4_2[1]);
-  let vec_b2 = f32x4_from_u8(rgba1_2[2], rgba2_2[2], rgba3_2[2], rgba4_2[2]);
-  let vec_a2 = f32x4_from_u8(rgba1_2[3], rgba2_2[3], rgba3_2[3], rgba4_2[3]);
+  let vec_r2 = Simd::gather_or_default(&input[4..], constants.gather_idx).cast::<f32>();
+  let vec_g2 = Simd::gather_or_default(&input[5..], constants.gather_idx).cast::<f32>();
+  let vec_b2 = Simd::gather_or_default(&input[6..], constants.gather_idx).cast::<f32>();
+  let vec_a2 = Simd::gather_or_default(&input[7..], constants.gather_idx).cast::<f32>();
 
   let y16a = calc_y(constants, &vec_r1, &vec_g1, &vec_b1);
   let cb16 = calc_cb(constants, &vec_r1, &vec_g1, &vec_b1);
@@ -93,9 +83,9 @@ fn combine_components(
   y: &Simd<f32, 4>,
 ) -> Simd<u32, 4> {
   // TODO - round these values?
-  let a2 = to_simd_u32(a);
-  let uv2 = to_simd_u32(uv);
-  let y2 = to_simd_u32(y);
+  let a2 = a.cast::<u32>();
+  let uv2 = uv.cast::<u32>();
+  let y2 = y.cast::<u32>();
 
   (a2 << constants.shift_20) + (uv2 << constants.shift_10) + y2
 }

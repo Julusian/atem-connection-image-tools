@@ -1,6 +1,5 @@
-use crate::util::to_simd_f32;
 use crate::yuv_constants::YuvConstantsSimd;
-use std::simd::{u32x4, Simd, SimdFloat, StdFloat};
+use std::simd::{u32x4, Simd, SimdFloat, SimdUint, StdFloat};
 
 #[inline(always)]
 pub fn yuva422_to_rgb_simd(constants: &YuvConstantsSimd, input: &[u8], target: &mut [u8]) {
@@ -80,9 +79,9 @@ fn split_components(
   let uv = (vec_combined >> constants.shift_10) & constants.splat1023;
   let y = vec_combined & constants.splat1023;
 
-  let y_full = (to_simd_f32(&y) - constants.luma_offset) / constants.luma_scale;
-  let uv_full = (to_simd_f32(&uv) - constants.cb_cr_offset) / constants.half_cb_cr_scale;
-  let a_full = (to_simd_f32(&a) - constants.alpha_offset) / constants.alpha_scale;
+  let y_full = (y.cast::<f32>() - constants.luma_offset) / constants.luma_scale;
+  let uv_full = (uv.cast::<f32>() - constants.cb_cr_offset) / constants.half_cb_cr_scale;
+  let a_full = (a.cast::<f32>() - constants.alpha_offset) / constants.alpha_scale;
 
   (y_full, uv_full, a_full)
 }

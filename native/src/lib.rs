@@ -6,7 +6,6 @@ use yuv_constants::YuvConstantsSimd;
 use yuva422_to_rgba_simd::yuva422_to_rgb_simd;
 
 mod rgba_to_yuva422_simd;
-mod util;
 mod yuv_constants;
 mod yuva422_to_rgba_simd;
 

@@ -39,6 +39,7 @@ pub struct YuvConstantsSimd {
   pub splat0f: Simd<f32, 4>,
   pub splat255f: Simd<f32, 4>,
 
+  pub gather_idx: Simd<usize, 4>,
   pub scatter_idx: Simd<usize, 4>,
 }
 impl YuvConstantsSimd {
@@ -86,6 +87,7 @@ impl YuvConstantsSimd {
       splat0f: f32x4::splat(0.0),
       splat255f: f32x4::splat(255.0),
 
+      gather_idx: Simd::from_array([0, 8, 16, 24]),
       scatter_idx: Simd::from_array([0, 8, 16, 24]),
     }
   }
