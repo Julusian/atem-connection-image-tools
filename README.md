@@ -5,7 +5,7 @@
 
 ## Usage
 
-This library is intended to be used as optional optimisations for atem-connection [NPM](https://www.npmjs.com/package/atem-connection) [Github](https://github.com/nrkno/sofie-atem-connection). It provides some image utilities with compiled (rust) implementations, which can be used instead of the javascript implementations used elsewhere.
+This library is intended to be used as optional optimisations for atem-connection [NPM](https://www.npmjs.com/package/atem-connection) [Github](https://github.com/sofie-automation/sofie-atem-connection). It provides some image utilities with compiled (rust) implementations, which can be used instead of the javascript implementations used elsewhere.
 
 ### Example:
 
