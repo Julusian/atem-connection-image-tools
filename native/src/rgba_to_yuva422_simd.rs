@@ -1,5 +1,5 @@
 use crate::yuv_constants::YuvConstantsSimd;
-use std::simd::{Simd, SimdFloat, SimdUint};
+use std::simd::{num::SimdFloat, num::SimdUint, Simd};
 
 #[inline(always)]
 pub fn rgb_to_yuva422_simd(constants: &YuvConstantsSimd, input: &[u8], target: &mut [u8]) {
