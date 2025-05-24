@@ -22,6 +22,24 @@ function convertRGBAToYUV422(width: number, height: number, data: Buffer): Buffe
 	return output
 }
 
+/**
+ * Convert an ATEM YUVA422 buffer to RGBA from the correct colorspace
+ *
+ * This is performed synchronously
+ *
+ * @param width - The width of the image
+ * @param height - The height of the image
+ * @param data - The input YUVA422 pixel data
+ * @returns The output RGBA pixel data
+ */
+function convertYUV422ToRGBA(width: number, height: number, data: Buffer): Buffer {
+	if (!Native) throw new Error('Library failed to initialise')
+
+	const output = Buffer.alloc(width * height * 4)
+	Native.convertYuva422ToRgba(width, height, data, output)
+	return output
+}
+
 function generateHashForBuffer(data: Buffer): string {
 	return data ? crypto.createHash('md5').update(data).digest('base64') : ''
 }
@@ -56,4 +74,12 @@ export function encodeImageForAtem(
 		isRleEncoded: false, // TODO: RLE
 		hash: generateHashForBuffer(encodedData),
 	}
+}
+
+export function decodeImageFromAtem(width: number, height: number, data: Buffer): Buffer {
+	const expectedLength = width * height * 4
+	if (data.length !== expectedLength)
+		throw new Error(`Pixel buffer has incorrect length. Received ${data.length} expected ${expectedLength}`)
+
+	return convertYUV422ToRGBA(width, height, data)
 }

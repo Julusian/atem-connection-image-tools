@@ -1,78 +1,9 @@
-use std::simd::{f32x4, u32x4, Simd};
-
-pub struct YuvConstantsSimd {
-  pub kr: Simd<f32, 4>,
-  pub kb: Simd<f32, 4>,
-  pub kg: Simd<f32, 4>,
-
-  pub kr_o_kb_i: Simd<f32, 4>,
-  pub kg_o_kb_i: Simd<f32, 4>,
-  pub kb_o_kr_i: Simd<f32, 4>,
-  pub kg_o_kr_i: Simd<f32, 4>,
-
-  pub luma_scale: Simd<f32, 4>,
-  pub luma_offset: Simd<f32, 4>,
-
-  pub cb_cr_offset: Simd<f32, 4>,
-  pub half_cb_cr_scale: Simd<f32, 4>,
-
-  pub alpha_scale: Simd<f32, 4>,
-  pub alpha_offset: Simd<f32, 4>,
-
-  pub shift_20: Simd<u32, 4>,
-  pub shift_10: Simd<u32, 4>,
-
-  pub splat2: Simd<u32, 4>,
-  pub splat4: Simd<u32, 4>,
-  pub splat6: Simd<u32, 4>,
-  pub splat8: Simd<u32, 4>,
-  pub splat15: Simd<u32, 4>,
-  pub splat255: Simd<u32, 4>,
-}
-impl YuvConstantsSimd {
-  pub fn create(kr: f32, kb: f32) -> YuvConstantsSimd {
-    let kg = 1.0 - kr - kb;
-    let kr_i = 1.0 - kr;
-    let kb_i = 1.0 - kb;
-
-    YuvConstantsSimd {
-      kr: f32x4::splat(kr),
-      kb: f32x4::splat(kb),
-      kg: f32x4::splat(kg),
-
-      kr_o_kb_i: f32x4::splat(-kr / kb_i),
-      kg_o_kb_i: f32x4::splat(-kg / kb_i),
-      kb_o_kr_i: f32x4::splat(-kb / kr_i),
-      kg_o_kr_i: f32x4::splat(-kg / kr_i),
-
-      luma_scale: f32x4::splat(219.0 / 64.0),
-      luma_offset: f32x4::splat(64.0),
-
-      cb_cr_offset: f32x4::splat(512.0),
-      half_cb_cr_scale: f32x4::splat(224.0 / 64.0 / 2.0),
-
-      alpha_scale: f32x4::splat(219.0 / 255.0 * 4.0),
-      alpha_offset: f32x4::splat(64.0),
-
-      shift_20: u32x4::splat(20),
-      shift_10: u32x4::splat(10),
-
-      splat2: u32x4::splat(2),
-      splat4: u32x4::splat(4),
-      splat6: u32x4::splat(6),
-      splat8: u32x4::splat(8),
-      splat15: u32x4::splat(0x0f),
-      splat255: u32x4::splat(0xff),
-    }
-  }
-}
-
-fn f32x4_from_u8(v1: u8, v2: u8, v3: u8, v4: u8) -> Simd<f32, 4> {
-  f32x4::from_array([v1 as f32, v2 as f32, v3 as f32, v4 as f32])
-}
+use crate::util::{f32x4_from_u8, to_simd_u32};
+use crate::yuv_constants::YuvConstantsSimd;
+use std::simd::Simd;
 
 #[inline(always)]
-pub fn rgb_to_yuv422_simd(constants: &YuvConstantsSimd, input: &[u8], target: &mut [u8]) {
+pub fn rgb_to_yuva422_simd(constants: &YuvConstantsSimd, input: &[u8], target: &mut [u8]) {
   let rgba1_1 = &input[0..4];
   let rgba1_2 = &input[4..8];
   let rgba2_1 = &input[8..12];
@@ -155,16 +86,6 @@ fn alpha_8_to_10bit(constants: &YuvConstantsSimd, val: &Simd<f32, 4>) -> Simd<f3
 }
 
 #[inline(always)]
-fn to_simd_u32(input: &Simd<f32, 4>) -> Simd<u32, 4> {
-  u32x4::from_array([
-    input[0] as u32,
-    input[1] as u32,
-    input[2] as u32,
-    input[3] as u32,
-  ])
-}
-
-#[inline(always)]
 fn combine_components(
   constants: &YuvConstantsSimd,
   a: &Simd<f32, 4>,
@@ -194,7 +115,7 @@ mod tests {
     input_ext[24..32].copy_from_slice(input);
 
     let mut target = [0; 32];
-    rgb_to_yuv422_simd(&bt601_constants, &input_ext, &mut target);
+    rgb_to_yuva422_simd(&bt601_constants, &input_ext, &mut target);
 
     let mut target_trimmed = [0; 8];
     target_trimmed.copy_from_slice(&target[0..8]);
