@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file. See [Convential Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) for commit guidelines.
 
+## [1.1.1](https://github.com/julusian/atem-connection-image-tools/compare/v1.1.0...v1.1.1) (Sat May 24 2025)
+
+
 ## [1.1.0](https://github.com/julusian/atem-connection-image-tools/compare/v1.0.0...v1.1.0) (Sat May 24 2025)
 
 
