@@ -171,7 +171,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bindings-${{ matrix.settings.target }}
           path: .
@@ -212,7 +212,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bindings-${{ matrix.settings.target }}
           path: .
@@ -247,7 +247,7 @@ jobs:
           yarn config set supportedArchitectures.libc "musl"	
           yarn install
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bindings-x86_64-unknown-linux-musl
           path: .
@@ -280,7 +280,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: artifacts
       - name: Move artifacts
