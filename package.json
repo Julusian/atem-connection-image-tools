@@ -7,12 +7,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/julusian/atem-connection-image-tools.git"
+    "url": "git+https://github.com/Julusian/atem-connection-image-tools.git"
   },
   "bugs": {
-    "url": "https://github.com/julusian/atem-connection-image-tools/issues"
+    "url": "https://github.com/Julusian/atem-connection-image-tools/issues"
   },
-  "homepage": "https://github.com/julusian/atem-connection-image-tools#readme",
+  "homepage": "https://github.com/Julusian/atem-connection-image-tools#readme",
   "maintainers": [
     {
       "name": "Julian Waller",
