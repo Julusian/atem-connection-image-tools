@@ -243,7 +243,7 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim yarn build:js && yarn unit
+        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim sh -c "command -v yarn >/dev/null 2>&1 || { npm install -g corepack && corepack enable; }; yarn build:js" && yarn unit
 
   test-linux-x64-musl-binding:
     name: Test on x86_64-unknown-linux-musl - node@${{ matrix.node }}
@@ -282,7 +282,7 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-alpine yarn build:js && yarn unit
+        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-alpine sh -c "command -v yarn >/dev/null 2>&1 || { npm install -g corepack && corepack enable; }; yarn build:js" && yarn unit
 
   publish:
     name: Release
