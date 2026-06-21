@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Convential Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) for commit guidelines.
 
+## [1.1.2](https://github.com/Julusian/atem-connection-image-tools/compare/v1.1.1...v1.1.2) (Sun Jun 21 2026)
+
+
+### Fixes
+
+* produce win32-arm64 build [1600f26](https://github.com/Julusian/atem-connection-image-tools/commit/1600f2683db769cbabd8d29eb50fac073051d0f2)
+
 ## [1.1.1](https://github.com/julusian/atem-connection-image-tools/compare/v1.1.0...v1.1.1) (Sat May 24 2025)
 
 
