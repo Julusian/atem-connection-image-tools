@@ -80,7 +80,7 @@ jobs:
     name: Build - ${{ matrix.settings.target }} - node@18
     runs-on: ${{ matrix.settings.host }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup node
         uses: actions/setup-node@v6
         if: ${{ !matrix.settings.docker }}
@@ -180,7 +180,7 @@ jobs:
             node: '18'
     runs-on: ${{ matrix.settings.host }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup node
         uses: actions/setup-node@v6
         with:
@@ -225,7 +225,7 @@ jobs:
           - '26'
     runs-on: ${{ matrix.settings.host }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup node
         uses: actions/setup-node@v6
         with:
@@ -262,7 +262,7 @@ jobs:
           - '26'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup node
         uses: actions/setup-node@v6
         with:
@@ -301,7 +301,7 @@ jobs:
       id-token: write # required for npm trusted publishing (OIDC)
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup node
         uses: actions/setup-node@v6
         with:
