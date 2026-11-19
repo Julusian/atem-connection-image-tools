@@ -1,6 +1,23 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [Convential Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) for commit guidelines.
+All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) for commit guidelines.
+
+## [2.0.0](https://github.com/Julusian/atem-connection-image-tools/compare/v1.1.2...v2.0.0) (Thu Nov 19 2026)
+
+## Breaking changes
+
+### Features
+
+* **!** drop 32-bit windows and armv7 linux builds [fc3556e](https://github.com/Julusian/atem-connection-image-tools/commit/fc3556ed181095fcc6d8ed23286f688b317fc175)
+* **!** convert to ESM and require node 22.16+ [7234e5f](https://github.com/Julusian/atem-connection-image-tools/commit/7234e5f15acb0eeb965c3673134b9c1f48245de5)
+
+### Features
+
+* add async encode and decode methods [7ac179e](https://github.com/Julusian/atem-connection-image-tools/commit/7ac179e89482df981a2670fc6100827b403e7d17)
+
+### Fixes
+
+* round alpha when converting rgba to yuva422 [b9b8f42](https://github.com/Julusian/atem-connection-image-tools/commit/b9b8f421dbbfa43f20f22c163b4291aed8b54f78)
 
 ## [1.1.2](https://github.com/Julusian/atem-connection-image-tools/compare/v1.1.1...v1.1.2) (Sun Jun 21 2026)
 
