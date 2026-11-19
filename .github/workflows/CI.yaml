@@ -94,7 +94,7 @@ jobs:
         run: rustup toolchain install && rustup target add ${{ matrix.settings.target }}
         shell: bash
       - name: Cache cargo
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry/index/
