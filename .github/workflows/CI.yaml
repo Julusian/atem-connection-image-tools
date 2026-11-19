@@ -74,9 +74,9 @@ jobs:
             target: armv7-unknown-linux-gnueabihf
             setup: |
               sudo apt-get update
-              sudo apt-get install gcc-arm-linux-gnueabihf -y
+              sudo apt-get install binutils-arm-linux-gnueabihf -y
             build: |
-              yarn build:rs --target armv7-unknown-linux-gnueabihf
+              yarn build:rs --target armv7-unknown-linux-gnueabihf --use-napi-cross
               arm-linux-gnueabihf-strip *.node
 
     name: Build - ${{ matrix.settings.target }} - node@22
@@ -104,10 +104,6 @@ jobs:
             .cargo-cache
             target/
           key: ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}
-      - uses: goto-bus-stop/setup-zig@v2
-        if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
-        with:
-          version: 0.10.1
       - name: Setup toolchain
         run: ${{ matrix.settings.setup }}
         if: ${{ matrix.settings.setup }}

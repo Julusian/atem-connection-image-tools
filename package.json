@@ -25,8 +25,8 @@
     "prepack": "pinst --disable",
     "postpack": "pinst --enable",
     "build": "yarn build:rs && yarn build:js",
-    "build:rs": "napi build --cargo-cwd native --platform --release --js=false --dts nativeLib.d.cts .",
-    "build:rs:debug": "napi build --cargo-cwd native --platform --js=false --dts nativeLib.d.cts .",
+    "build:rs": "napi build --manifest-path native/Cargo.toml --platform --release --no-js --dts nativeLib.d.cts --output-dir .",
+    "build:rs:debug": "napi build --manifest-path native/Cargo.toml --platform --no-js --dts nativeLib.d.cts --output-dir .",
     "build:js": "rimraf dist && run build:main --force",
     "build:main": "tsc --build tsconfig.json",
     "lint:eslint": "eslint .",
@@ -57,7 +57,7 @@
     "nativeLib.*"
   ],
   "devDependencies": {
-    "@napi-rs/cli": "^2.18.4",
+    "@napi-rs/cli": "^3.10.12",
     "@sofie-automation/code-standard-preset": "~4.0.4",
     "@types/node": "^22.20.5",
     "eslint": "^10.15.0",
@@ -80,16 +80,18 @@
     ]
   },
   "napi": {
-    "name": "atem-connection-image-tools",
-    "triples": {
-      "additional": [
-        "aarch64-apple-darwin",
-        "aarch64-unknown-linux-gnu",
-        "armv7-unknown-linux-gnueabihf",
-        "x86_64-unknown-linux-musl",
-        "aarch64-pc-windows-msvc"
-      ]
-    }
+    "binaryName": "atem-connection-image-tools",
+    "targets": [
+      "x86_64-apple-darwin",
+      "aarch64-apple-darwin",
+      "x86_64-pc-windows-msvc",
+      "i686-pc-windows-msvc",
+      "aarch64-pc-windows-msvc",
+      "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-linux-musl",
+      "aarch64-unknown-linux-gnu",
+      "armv7-unknown-linux-gnueabihf"
+    ]
   },
   "packageManager": "yarn@4.18.1"
 }
