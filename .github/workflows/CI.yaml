@@ -47,12 +47,13 @@ jobs:
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
             build: |-
               set -e &&
+              corepack enable &&
               yarn build:rs --target x86_64-unknown-linux-gnu &&
               strip *.node
           - host: ubuntu-latest
             target: x86_64-unknown-linux-musl
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
-            build: set -e && yarn build:rs && strip *.node
+            build: set -e && corepack enable && yarn build:rs && strip *.node
 
           - host: macos-latest
             target: aarch64-apple-darwin
@@ -65,6 +66,7 @@ jobs:
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-aarch64
             build: |-
               set -e &&
+              corepack enable &&
               rustup target add aarch64-unknown-linux-gnu &&
               yarn build:rs --target aarch64-unknown-linux-gnu &&
               aarch64-unknown-linux-gnu-strip *.node
@@ -87,7 +89,6 @@ jobs:
         with:
           node-version: 18
           check-latest: true
-          cache: yarn
       - name: Install rust
         # version and components are defined in rust-toolchain.toml
         if: ${{ !matrix.settings.docker }}
@@ -111,6 +112,11 @@ jobs:
         run: ${{ matrix.settings.setup }}
         if: ${{ matrix.settings.setup }}
         shell: bash
+      - name: Enable corepack
+        run: |
+          npm install -g corepack
+          corepack enable
+        shell: bash
       - name: Setup node x86
         if: matrix.settings.target == 'i686-pc-windows-msvc'
         run: yarn config set supportedArchitectures.cpu "ia32"
@@ -123,7 +129,6 @@ jobs:
         with:
           node-version: 18
           check-latest: true
-          cache: yarn
           architecture: x86
       - name: Build in docker
         uses: addnab/docker-run-action@v3
@@ -186,7 +191,11 @@ jobs:
           node-version: ${{ matrix.node }}
           architecture: ${{ matrix.settings.architecture }}
           check-latest: true
-          cache: yarn
+      - name: Enable corepack
+        run: |
+          npm install -g corepack
+          corepack enable
+        shell: bash
       - name: Install dependencies
         run: yarn install
       - name: Download artifacts
@@ -230,7 +239,11 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           check-latest: true
-          cache: yarn
+      - name: Enable corepack
+        run: |
+          npm install -g corepack
+          corepack enable
+        shell: bash
       - name: Install dependencies
         run: yarn install
       - name: Download artifacts
@@ -242,7 +255,7 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim sh -c "command -v yarn >/dev/null 2>&1 || { npm install -g corepack && corepack enable; }; yarn build:js" && yarn unit
+        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim sh -c "npm install -g corepack && corepack enable && yarn build:js" && yarn unit
 
   test-linux-x64-musl-binding:
     name: Test on x86_64-unknown-linux-musl - node@${{ matrix.node }}
@@ -267,9 +280,10 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           check-latest: true
-          cache: yarn
       - name: Install dependencies
         run: |
+          npm install -g corepack
+          corepack enable
           yarn config set supportedArchitectures.libc "musl"
           yarn install
       - name: Download artifacts
@@ -281,7 +295,7 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-alpine sh -c "command -v yarn >/dev/null 2>&1 || { npm install -g corepack && corepack enable; }; yarn build:js" && yarn unit
+        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-alpine sh -c "npm install -g corepack && corepack enable && yarn build:js" && yarn unit
 
   publish:
     name: Release
@@ -306,7 +320,16 @@ jobs:
         with:
           node-version: 24
           check-latest: true
-          cache: yarn
+      - name: Enable corepack
+        run: |
+          npm install -g corepack
+          corepack enable
+        shell: bash
+      - name: Enable corepack
+        run: |
+          npm install -g corepack
+          corepack enable
+        shell: bash
       - name: Install dependencies
         run: yarn install
       - name: Download all artifacts
