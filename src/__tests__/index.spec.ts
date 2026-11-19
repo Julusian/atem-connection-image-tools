@@ -7,6 +7,7 @@ import {
 	encodeImageForAtemAsync,
 	NativeError,
 } from '../index.js'
+import type { UploadBufferInfo } from '../copy.js'
 
 function createTestImage(width: number, height: number): Buffer {
 	const input = Buffer.alloc(width * height * 4)
@@ -14,6 +15,12 @@ function createTestImage(width: number, height: number): Buffer {
 		input[i] = (i * 37) & 0xff
 	}
 	return input
+}
+
+/** Strip the image data, as `toEqual` compares buffers byte by byte which is very slow for full size images */
+function withoutData(info: UploadBufferInfo): Omit<UploadBufferInfo, 'encodedData'> {
+	const { encodedData: _encodedData, ...rest } = info
+	return rest
 }
 
 function createFlatImage(width: number, height: number): Buffer {
@@ -82,7 +89,8 @@ describe('async', () => {
 		const syncResult = encodeImageForAtem(width, height, input, 'rgba')
 		const asyncResult = await encodeImageForAtemAsync(width, height, input, 'rgba')
 
-		expect(asyncResult).toEqual(syncResult)
+		expect(withoutData(asyncResult)).toEqual(withoutData(syncResult))
+		expect(asyncResult.encodedData.equals(syncResult.encodedData)).toBe(true)
 	})
 
 	test('decode matches sync', async () => {
@@ -114,7 +122,8 @@ describe('async', () => {
 			Array.from({ length: 8 }, async () => encodeImageForAtemAsync(width, height, input, 'rgba'))
 		)
 		for (const result of results) {
-			expect(result).toEqual(expected)
+			expect(withoutData(result)).toEqual(withoutData(expected))
+			expect(result.encodedData.equals(expected.encodedData)).toBe(true)
 		}
 	})
 })
