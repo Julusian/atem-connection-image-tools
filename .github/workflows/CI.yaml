@@ -34,11 +34,6 @@ jobs:
             build: yarn build:rs
             target: x86_64-pc-windows-msvc
           - host: windows-latest
-            build: |
-              yarn build:rs --target i686-pc-windows-msvc
-              yarn unit
-            target: i686-pc-windows-msvc
-          - host: windows-latest
             build: yarn build:rs --target aarch64-pc-windows-msvc
             target: aarch64-pc-windows-msvc
 
@@ -70,14 +65,6 @@ jobs:
               rustup target add aarch64-unknown-linux-gnu &&
               yarn build:rs --target aarch64-unknown-linux-gnu &&
               aarch64-unknown-linux-gnu-strip *.node
-          - host: ubuntu-latest
-            target: armv7-unknown-linux-gnueabihf
-            setup: |
-              sudo apt-get update
-              sudo apt-get install binutils-arm-linux-gnueabihf -y
-            build: |
-              yarn build:rs --target armv7-unknown-linux-gnueabihf --use-napi-cross
-              arm-linux-gnueabihf-strip *.node
 
     name: Build - ${{ matrix.settings.target }} - node@22
     runs-on: ${{ matrix.settings.host }}
@@ -104,28 +91,13 @@ jobs:
             .cargo-cache
             target/
           key: ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}
-      - name: Setup toolchain
-        run: ${{ matrix.settings.setup }}
-        if: ${{ matrix.settings.setup }}
-        shell: bash
       - name: Enable corepack
         run: |
           npm install -g --force corepack
           corepack enable
         shell: bash
-      - name: Setup node x86
-        if: matrix.settings.target == 'i686-pc-windows-msvc'
-        run: yarn config set supportedArchitectures.cpu "ia32"
-        shell: bash
       - name: Install dependencies
         run: yarn install
-      - name: Setup node x86
-        uses: actions/setup-node@v7
-        if: matrix.settings.target == 'i686-pc-windows-msvc'
-        with:
-          node-version: 22
-          check-latest: true
-          architecture: x86
       - name: Build in docker
         uses: addnab/docker-run-action@v3
         if: ${{ matrix.settings.docker }}
