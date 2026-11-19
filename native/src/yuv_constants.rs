@@ -28,19 +28,10 @@ pub struct YuvConstantsSimd {
   pub shift_20: Simd<u32, 4>,
   pub shift_10: Simd<u32, 4>,
 
-  pub splat2: Simd<u32, 4>,
-  pub splat4: Simd<u32, 4>,
-  pub splat6: Simd<u32, 4>,
-  pub splat8: Simd<u32, 4>,
-  pub splat15: Simd<u32, 4>,
-  pub splat255: Simd<u32, 4>,
   pub splat1023: Simd<u32, 4>,
 
   pub splat0f: Simd<f32, 4>,
   pub splat255f: Simd<f32, 4>,
-
-  pub gather_idx: Simd<usize, 4>,
-  pub scatter_idx: Simd<usize, 4>,
 }
 impl YuvConstantsSimd {
   pub fn create(kr: f32, kb: f32) -> YuvConstantsSimd {
@@ -76,19 +67,10 @@ impl YuvConstantsSimd {
       shift_20: u32x4::splat(20),
       shift_10: u32x4::splat(10),
 
-      splat2: u32x4::splat(2),
-      splat4: u32x4::splat(4),
-      splat6: u32x4::splat(6),
-      splat8: u32x4::splat(8),
-      splat15: u32x4::splat(0x0f),
-      splat255: u32x4::splat(0xff),
       splat1023: u32x4::splat(0x3ff),
 
       splat0f: f32x4::splat(0.0),
       splat255f: f32x4::splat(255.0),
-
-      gather_idx: Simd::from_array([0, 8, 16, 24]),
-      scatter_idx: Simd::from_array([0, 8, 16, 24]),
     }
   }
 }

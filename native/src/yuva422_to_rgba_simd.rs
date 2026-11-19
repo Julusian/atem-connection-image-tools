@@ -33,25 +33,39 @@ pub fn yuva422_to_rgb_simd(
   let g2 = calc_g(constants, &vec_y2, &vec_cb, &vec_cr);
   let b2 = calc_b(constants, &vec_y2, &vec_cb);
 
-  let r1_u8 = r1.round().cast::<u8>();
-  let g1_u8 = g1.round().cast::<u8>();
-  let b1_u8 = b1.round().cast::<u8>();
-  let a1_u8 = a1.round().cast::<u8>();
+  let px1 = pack_rgba(constants, &r1, &g1, &b1, &a1);
+  let px2 = pack_rgba(constants, &r2, &g2, &b2, &a2);
 
-  let r2_u8 = r2.round().cast::<u8>();
-  let g2_u8 = g2.round().cast::<u8>();
-  let b2_u8 = b2.round().cast::<u8>();
-  let a2_u8 = a2.round().cast::<u8>();
+  for i in 0..4 {
+    let offset = i * 8;
+    target[offset..offset + 4].copy_from_slice(&px1[i].to_le_bytes());
+    target[offset + 4..offset + 8].copy_from_slice(&px2[i].to_le_bytes());
+  }
+}
 
-  r1_u8.scatter(target, constants.scatter_idx);
-  g1_u8.scatter(&mut target[1..], constants.scatter_idx);
-  b1_u8.scatter(&mut target[2..], constants.scatter_idx);
-  a1_u8.scatter(&mut target[3..], constants.scatter_idx);
+/// Pack the channels into u32 words, which are RGBA when written as little endian
+#[inline(always)]
+fn pack_rgba(
+  constants: &YuvConstantsSimd,
+  r: &Simd<f32, 4>,
+  g: &Simd<f32, 4>,
+  b: &Simd<f32, 4>,
+  a: &Simd<f32, 4>,
+) -> Simd<u32, 4> {
+  // r/g/b are already clamped to 0-255, alpha is clamped here
+  let a = a.simd_clamp(constants.splat0f, constants.splat255f);
 
-  r2_u8.scatter(&mut target[4..], constants.scatter_idx);
-  g2_u8.scatter(&mut target[5..], constants.scatter_idx);
-  b2_u8.scatter(&mut target[6..], constants.scatter_idx);
-  a2_u8.scatter(&mut target[7..], constants.scatter_idx);
+  // Safety: all values are finite and within 0-255, so fit in a u32
+  let (r, g, b, a) = unsafe {
+    (
+      r.round().to_int_unchecked::<u32>(),
+      g.round().to_int_unchecked::<u32>(),
+      b.round().to_int_unchecked::<u32>(),
+      a.round().to_int_unchecked::<u32>(),
+    )
+  };
+
+  r | (g << 8) | (b << 16) | (a << 24)
 }
 
 #[inline(always)]

@@ -1,12 +1,10 @@
-use napi::JsBufferValue;
-
 pub(crate) struct RLEDecoder<'a> {
-  input: &'a JsBufferValue,
+  input: &'a [u8],
   read_offset: usize,
   rle_remaining: usize,
 }
 impl<'a> RLEDecoder<'a> {
-  pub fn new(input: &'a JsBufferValue) -> Self {
+  pub fn new(input: &'a [u8]) -> Self {
     RLEDecoder {
       input,
       read_offset: 0,

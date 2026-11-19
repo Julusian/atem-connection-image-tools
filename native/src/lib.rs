@@ -1,10 +1,9 @@
 #![feature(portable_simd)]
 
 use napi::{Env, JsBuffer, JsUndefined};
-use rgba_to_yuva422_simd::rgb_to_yuva422_simd;
 use yuv_constants::YuvConstantsSimd;
-use yuva422_to_rgba_simd::yuva422_to_rgb_simd;
 
+mod dispatch;
 mod rgba_to_yuva422_simd;
 mod rle;
 mod yuv_constants;
@@ -61,16 +60,11 @@ pub fn convert_rgba_to_yuva_422(
   let constants_simd = YuvConstantsSimd::create(kr, kb);
 
   let batch_count = sample_count / 4;
-  for i in 0..batch_count {
-    let offset_start = i * 32;
-    let offset_end = offset_start + 32;
-
-    rgb_to_yuva422_simd(
-      &constants_simd,
-      &input_vec[offset_start..offset_end],
-      &mut output_vec[offset_start..offset_end],
-    );
-  }
+  dispatch::encode(
+    &constants_simd,
+    &input_vec[..batch_count * 32],
+    &mut output_vec[..batch_count * 32],
+  );
 
   env.get_undefined()
 }
@@ -120,33 +114,7 @@ pub fn convert_yuva_422_to_rgba(
 
   let constants_simd = YuvConstantsSimd::create(kr, kb);
 
-  let mut write_offset = 0;
-  let mut decoder = rle::RLEDecoder::new(&input_vec);
-
-  // let batch_count = sample_count / 4;
-  while write_offset < output_vec.len() {
-    let sample1 = decoder.read_sample();
-    let sample2 = decoder.read_sample();
-    let sample3 = decoder.read_sample();
-    let sample4 = decoder.read_sample();
-
-    // TODO - this could be handled better if needed, but that is difficult to do sanely
-    if sample1.is_none() || sample2.is_none() || sample3.is_none() || sample4.is_none() {
-      break; // Not enough data
-    }
-
-    let old_write_offset = write_offset;
-    write_offset += 32;
-
-    yuva422_to_rgb_simd(
-      &constants_simd,
-      &sample1.unwrap(),
-      &sample2.unwrap(),
-      &sample3.unwrap(),
-      &sample4.unwrap(),
-      &mut output_vec[old_write_offset..write_offset],
-    );
-  }
+  let write_offset = dispatch::decode(&constants_simd, &input_vec, &mut output_vec);
 
   // Throw if not enough data was decoded
   if write_offset < output_vec.len() {

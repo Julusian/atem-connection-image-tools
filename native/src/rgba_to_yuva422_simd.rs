@@ -1,17 +1,18 @@
 use crate::yuv_constants::YuvConstantsSimd;
-use std::simd::{num::SimdFloat, num::SimdUint, Simd, StdFloat};
+use std::simd::{num::SimdFloat, num::SimdUint, u32x4, Simd, StdFloat};
 
 #[inline(always)]
 pub fn rgb_to_yuva422_simd(constants: &YuvConstantsSimd, input: &[u8], target: &mut [u8]) {
-  let vec_r1 = Simd::gather_or_default(input, constants.gather_idx).cast::<f32>();
-  let vec_g1 = Simd::gather_or_default(&input[1..], constants.gather_idx).cast::<f32>();
-  let vec_b1 = Simd::gather_or_default(&input[2..], constants.gather_idx).cast::<f32>();
-  let vec_a1 = Simd::gather_or_default(&input[3..], constants.gather_idx).cast::<f32>();
+  // Load the 8 pixels as little endian u32 words (r is the low byte), split into the first and second pixel of each pair
+  let mut words = [0u32; 8];
+  for (i, word) in words.iter_mut().enumerate() {
+    *word = u32::from_le_bytes(input[i * 4..i * 4 + 4].try_into().unwrap());
+  }
+  let px1 = u32x4::from_array([words[0], words[2], words[4], words[6]]);
+  let px2 = u32x4::from_array([words[1], words[3], words[5], words[7]]);
 
-  let vec_r2 = Simd::gather_or_default(&input[4..], constants.gather_idx).cast::<f32>();
-  let vec_g2 = Simd::gather_or_default(&input[5..], constants.gather_idx).cast::<f32>();
-  let vec_b2 = Simd::gather_or_default(&input[6..], constants.gather_idx).cast::<f32>();
-  let vec_a2 = Simd::gather_or_default(&input[7..], constants.gather_idx).cast::<f32>();
+  let (vec_r1, vec_g1, vec_b1, vec_a1) = unpack_rgba(&px1);
+  let (vec_r2, vec_g2, vec_b2, vec_a2) = unpack_rgba(&px2);
 
   let y16a = calc_y(constants, &vec_r1, &vec_g1, &vec_b1);
   let cb16 = calc_cb(constants, &vec_r1, &vec_g1, &vec_b1);
@@ -32,6 +33,17 @@ pub fn rgb_to_yuva422_simd(constants: &YuvConstantsSimd, input: &[u8], target: &
     target[offset..offset4].copy_from_slice(&block1[i].to_be_bytes());
     target[offset4..offset8].copy_from_slice(&block2[i].to_be_bytes())
   }
+}
+
+#[inline(always)]
+fn unpack_rgba(px: &Simd<u32, 4>) -> (Simd<f32, 4>, Simd<f32, 4>, Simd<f32, 4>, Simd<f32, 4>) {
+  let mask = u32x4::splat(0xff);
+  (
+    (px & mask).cast::<f32>(),
+    ((px >> 8) & mask).cast::<f32>(),
+    ((px >> 16) & mask).cast::<f32>(),
+    (px >> 24).cast::<f32>(),
+  )
 }
 
 #[inline(always)]
