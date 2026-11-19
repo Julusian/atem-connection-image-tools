@@ -1,5 +1,5 @@
 use crate::yuv_constants::YuvConstantsSimd;
-use std::simd::{num::SimdFloat, num::SimdUint, Simd};
+use std::simd::{num::SimdFloat, num::SimdUint, Simd, StdFloat};
 
 #[inline(always)]
 pub fn rgb_to_yuva422_simd(constants: &YuvConstantsSimd, input: &[u8], target: &mut [u8]) {
@@ -72,7 +72,8 @@ fn calc_cr(
 
 #[inline(always)]
 fn alpha_8_to_10bit(constants: &YuvConstantsSimd, val: &Simd<f32, 4>) -> Simd<f32, 4> {
-  constants.alpha_offset + (val * constants.alpha_scale)
+  // Round to match the values the switcher produces for uploaded images
+  constants.alpha_offset + (val * constants.alpha_scale).round()
 }
 
 #[inline(always)]
@@ -127,7 +128,7 @@ mod tests {
   #[test]
   fn test_one() {
     let input = [28, 69, 148, 247, 117, 221, 18, 95];
-    let output = [57, 10, 137, 32, 24, 102, 134, 122];
+    let output = [57, 26, 137, 32, 24, 102, 134, 122];
     assert_eq!(rgb_to_yuv422_single(&input), output);
   }
 
@@ -141,14 +142,14 @@ mod tests {
   #[test]
   fn test_three() {
     let input = [189, 218, 98, 133, 76, 128, 210, 222];
-    let output = [32, 132, 254, 221, 51, 167, 189, 224];
+    let output = [32, 148, 254, 221, 51, 183, 189, 224];
     assert_eq!(rgb_to_yuv422_single(&input), output);
   }
 
   #[test]
   fn test_four() {
     let input = [105, 85, 41, 102, 106, 19, 8, 133];
-    let output = [25, 230, 157, 102, 32, 136, 188, 213];
+    let output = [25, 230, 157, 102, 32, 152, 188, 213];
     assert_eq!(rgb_to_yuv422_single(&input), output);
   }
 
@@ -162,7 +163,7 @@ mod tests {
   #[test]
   fn test_six() {
     let input = [74, 254, 208, 22, 141, 123, 40, 132];
-    let output = [8, 184, 102, 219, 32, 83, 73, 214];
+    let output = [8, 200, 102, 219, 32, 83, 73, 214];
     assert_eq!(rgb_to_yuv422_single(&input), output);
   }
 
@@ -175,19 +176,40 @@ mod tests {
   #[test]
   fn test_eight() {
     let input = [171, 98, 86, 67, 159, 235, 17, 105];
-    let output = [18, 102, 253, 213, 26, 138, 14, 193];
+    let output = [18, 102, 253, 213, 26, 154, 14, 193];
     assert_eq!(rgb_to_yuv422_single(&input), output);
   }
   #[test]
   fn test_nine() {
     let input = [130, 226, 137, 84, 215, 97, 152, 118];
-    let output = [22, 6, 114, 192, 29, 85, 198, 26];
+    let output = [22, 22, 114, 192, 29, 85, 198, 26];
     assert_eq!(rgb_to_yuv422_single(&input), output);
   }
   #[test]
   fn test_ten() {
     let input = [245, 20, 254, 158, 241, 114, 121, 152];
-    let output = [37, 236, 81, 197, 36, 173, 30, 74];
+    let output = [37, 252, 81, 197, 36, 173, 30, 74];
     assert_eq!(rgb_to_yuv422_single(&input), output);
+  }
+
+  #[test]
+  fn test_alpha_matches_switcher() {
+    // Pairs observed from a still uploaded to a Constellation HD
+    let observed: [(u8, u32); 7] = [
+      (0, 64),
+      (1, 67),
+      (2, 71),
+      (127, 500),
+      (128, 504),
+      (254, 937),
+      (255, 940),
+    ];
+    for (alpha8, alpha10) in observed {
+      let output = rgb_to_yuv422_single(&[0, 0, 0, alpha8, 0, 0, 0, alpha8]);
+      let word1 = u32::from_be_bytes(output[0..4].try_into().unwrap());
+      let word2 = u32::from_be_bytes(output[4..8].try_into().unwrap());
+      assert_eq!(word1 >> 20, alpha10, "alpha {}", alpha8);
+      assert_eq!(word2 >> 20, alpha10, "alpha {}", alpha8);
+    }
   }
 }

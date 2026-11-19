@@ -121,6 +121,76 @@ mod tests {
     assert_eq!(yuva422_to_rgb_single(&input), output);
   }
 
+  fn alpha_pair(alpha10: u32) -> [u8; 8] {
+    let word = ((alpha10 << 20) | (512 << 10) | 64).to_be_bytes();
+    let mut input = [0; 8];
+    input[0..4].copy_from_slice(&word);
+    input[4..8].copy_from_slice(&word);
+    input
+  }
+
+  #[test]
+  fn test_alpha_clamped() {
+    // Stills captured on the switcher can use values outside of 64-940
+    for (alpha10, alpha8) in [(0, 0), (63, 0), (944, 255), (1023, 255)] {
+      let output = yuva422_to_rgb_single(&alpha_pair(alpha10));
+      assert_eq!(
+        (output[3], output[7]),
+        (alpha8, alpha8),
+        "alpha {}",
+        alpha10
+      );
+    }
+  }
+
+  #[test]
+  fn test_alpha_matches_switcher() {
+    // Pairs observed from a still uploaded to a Constellation HD
+    let observed: [(u8, u32); 7] = [
+      (0, 64),
+      (1, 67),
+      (2, 71),
+      (127, 500),
+      (128, 504),
+      (254, 937),
+      (255, 940),
+    ];
+    for (alpha8, alpha10) in observed {
+      let output = yuva422_to_rgb_single(&alpha_pair(alpha10));
+      assert_eq!(
+        (output[3], output[7]),
+        (alpha8, alpha8),
+        "alpha {}",
+        alpha10
+      );
+    }
+  }
+
+  #[test]
+  fn test_alpha_round_trip() {
+    let bt601_constants = YuvConstantsSimd::create(0.299, 0.114);
+    for alpha8 in 0..=255u8 {
+      let mut rgba = [0u8; 32];
+      for i in 0..8 {
+        rgba[i * 4 + 3] = alpha8;
+      }
+      let mut yuva = [0u8; 32];
+      crate::rgba_to_yuva422_simd::rgb_to_yuva422_simd(&bt601_constants, &rgba, &mut yuva);
+      let mut result = [0u8; 32];
+      yuva422_to_rgb_simd(
+        &bt601_constants,
+        &yuva[0..8],
+        &yuva[8..16],
+        &yuva[16..24],
+        &yuva[24..32],
+        &mut result,
+      );
+      for i in 0..8 {
+        assert_eq!(result[i * 4 + 3], alpha8, "alpha {}", alpha8);
+      }
+    }
+  }
+
   // TODO: are these tests any good?
   // They assume lossess cb/cr values, which is not the case because of the 422
 
