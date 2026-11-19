@@ -48,7 +48,9 @@ fn decode_avx2(constants: &YuvConstantsSimd, input: &[u8], output: &mut [u8]) ->
 
 #[inline(always)]
 fn encode_impl(constants: &YuvConstantsSimd, input: &[u8], output: &mut [u8]) {
-  for (src, dst) in input.chunks_exact(32).zip(output.chunks_exact_mut(32)) {
+  let (src_chunks, _) = input.as_chunks::<32>();
+  let (dst_chunks, _) = output.as_chunks_mut::<32>();
+  for (src, dst) in src_chunks.iter().zip(dst_chunks) {
     rgb_to_yuva422_simd(constants, src, dst);
   }
 }
@@ -58,7 +60,7 @@ fn decode_impl(constants: &YuvConstantsSimd, input: &[u8], output: &mut [u8]) ->
   let mut decoder = RLEDecoder::new(input);
   let mut write_offset = 0;
 
-  for dst in output.chunks_exact_mut(32) {
+  for dst in output.as_chunks_mut::<32>().0 {
     let (Some(sample1), Some(sample2), Some(sample3), Some(sample4)) = (
       decoder.read_sample(),
       decoder.read_sample(),

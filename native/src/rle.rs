@@ -57,6 +57,6 @@ impl<'a> RLEDecoder<'a> {
 
     self.read_offset += 8; // Move past the sample
 
-    return Some(value);
+    Some(value)
   }
 }

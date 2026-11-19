@@ -1,4 +1,4 @@
-use std::simd::{f32x4, u32x4, Simd};
+use std::simd::{Simd, f32x4, u32x4};
 
 pub struct YuvConstantsSimd {
   pub kr: Simd<f32, 4>,

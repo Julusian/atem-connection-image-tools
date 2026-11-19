@@ -88,12 +88,11 @@ jobs:
           node-version: 18
           check-latest: true
           cache: yarn
-      - name: Install
-        uses: dtolnay/rust-toolchain@master
+      - name: Install rust
+        # version and components are defined in rust-toolchain.toml
         if: ${{ !matrix.settings.docker }}
-        with:
-          toolchain: 'nightly-2025-05-24'
-          targets: ${{ matrix.settings.target }}
+        run: rustup toolchain install && rustup target add ${{ matrix.settings.target }}
+        shell: bash
       - name: Cache cargo
         uses: actions/cache@v5
         with:
