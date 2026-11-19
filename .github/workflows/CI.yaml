@@ -114,7 +114,7 @@ jobs:
         shell: bash
       - name: Enable corepack
         run: |
-          npm install -g corepack
+          npm install -g --force corepack
           corepack enable
         shell: bash
       - name: Setup node x86
@@ -182,7 +182,7 @@ jobs:
           check-latest: true
       - name: Enable corepack
         run: |
-          npm install -g corepack
+          npm install -g --force corepack
           corepack enable
         shell: bash
       - name: Install dependencies
@@ -226,7 +226,7 @@ jobs:
           check-latest: true
       - name: Enable corepack
         run: |
-          npm install -g corepack
+          npm install -g --force corepack
           corepack enable
         shell: bash
       - name: Install dependencies
@@ -240,7 +240,7 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim sh -c "npm install -g corepack && corepack enable && yarn build:js" && yarn unit
+        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim sh -c "npm install -g --force corepack && corepack enable && yarn build:js" && yarn unit
 
   test-linux-x64-musl-binding:
     name: Test on x86_64-unknown-linux-musl - node@${{ matrix.node }}
@@ -263,7 +263,7 @@ jobs:
           check-latest: true
       - name: Install dependencies
         run: |
-          npm install -g corepack
+          npm install -g --force corepack
           corepack enable
           yarn config set supportedArchitectures.libc "musl"
           yarn install
@@ -276,7 +276,7 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-alpine sh -c "npm install -g corepack && corepack enable && yarn build:js" && yarn unit
+        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-alpine sh -c "npm install -g --force corepack && corepack enable && yarn build:js" && yarn unit
 
   publish:
     name: Release
@@ -303,7 +303,7 @@ jobs:
           check-latest: true
       - name: Enable corepack
         run: |
-          npm install -g corepack
+          npm install -g --force corepack
           corepack enable
         shell: bash
       - name: Install dependencies
