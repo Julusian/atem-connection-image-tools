@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { decodeImageFromAtem, encodeImageForAtem, NativeError } from '../index'
+import { decodeImageFromAtem, encodeImageForAtem, NativeError } from '../index.js'
 
 describe('native', () => {
 	test('loads', () => {

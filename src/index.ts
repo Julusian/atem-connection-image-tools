@@ -1,8 +1,9 @@
 import * as crypto from 'crypto'
-import { UploadBufferInfo } from './copy'
-import { Native } from './nativeLoader'
 
-export { NativeError } from './nativeLoader'
+import { UploadBufferInfo } from './copy.js'
+import { Native } from './nativeLoader.js'
+
+export { NativeError } from './nativeLoader.js'
 
 /**
  * Convert a RGBA buffer to ATEM YUV422 packing in the correct colorspace

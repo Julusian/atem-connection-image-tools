@@ -34,7 +34,7 @@ jobs:
           corepack enable
           yarn install
 
-      - name: ESLint
+      - name: Lint
         run: yarn lint
 
       - name: Cargo fmt

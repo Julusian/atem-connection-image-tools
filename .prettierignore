@@ -1,2 +1,6 @@
 package.json
 CHANGELOG.md
+.yarnrc.yml
+native/target
+nativeLib.d.ts
+prebuilds

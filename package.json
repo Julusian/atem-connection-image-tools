@@ -20,27 +20,28 @@
     }
   ],
   "scripts": {
+    "postinstall": "husky",
+    "prepack": "pinst --disable",
+    "postpack": "pinst --enable",
     "build": "yarn build:rs && yarn build:js",
-    "build:rs": "napi build --cargo-cwd native --platform --release  --js=false --dts nativeLib.d.ts .",
-    "build:rs:debug": "napi build --cargo-cwd native --platform rust",
-    "build:js": "rimraf dist && run build:main",
-    "build:main": "tsc -p tsconfig.build.json",
-    "lint:raw": "run eslint --ext .ts --ext .js --ext .tsx --ext .jsx ",
-    "lint": "run lint:raw .",
-    "lint-fix": "run lint --fix",
+    "build:rs": "napi build --cargo-cwd native --platform --release --js=false --dts nativeLib.d.ts .",
+    "build:rs:debug": "napi build --cargo-cwd native --platform --js=false --dts nativeLib.d.ts .",
+    "build:js": "rimraf dist && run build:main --force",
+    "build:main": "tsc --build tsconfig.json",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier --check .",
+    "lint:prettier:fix": "prettier --write .",
+    "lint": "yarn lint:eslint && yarn lint:prettier",
+    "lint:fix": "yarn lint:eslint --fix && yarn lint:prettier:fix",
     "unit": "run unit:js && run unit:rs",
     "unit:js": "vitest run",
     "unit:rs": "cd native && cargo test",
     "test": "run lint && run unit",
     "watch": "vitest",
-    "release": "sofie-version",
     "reset": "git clean -dfx && git reset --hard && yarn",
     "validate:dependencies": "yarn npm audit --environment production && run license-validate",
     "validate:dev-dependencies": "yarn npm audit --environment development",
-    "license-validate": "sofie-licensecheck --allowPackages caniuse-lite@1.0.30001319",
-    "eslint": "./node_modules/.bin/eslint",
-    "prettier": "./node_modules/.bin/prettier",
-    "lint-staged": "./node_modules/.bin/lint-staged"
+    "license-validate": "sofie-licensecheck --allowPackages caniuse-lite@1.0.30001319"
   },
   "engines": {
     "node": "^14.18 || ^16.14 || >=18.0"
@@ -56,20 +57,25 @@
   ],
   "devDependencies": {
     "@napi-rs/cli": "^2.18.4",
-    "@sofie-automation/code-standard-preset": "~2.5.2",
-    "@types/node": "^14.18.63",
-    "rimraf": "^5.0.10",
-    "typescript": "~5.2.2",
+    "@sofie-automation/code-standard-preset": "~4.0.4",
+    "@types/node": "^22.20.5",
+    "eslint": "^10.15.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.1",
+    "pinst": "^3.0.0",
+    "prettier": "^3.10.1",
+    "rimraf": "^6.1.4",
+    "typescript": "~6.0.3",
     "vite": "^8.3.8",
     "vitest": "^5.1.0"
   },
-  "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
+  "prettier": "@sofie-automation/code-standard-preset/prettier.config.mjs",
   "lint-staged": {
-    "*.{css,json,md,scss}": [
-      "prettier --write"
+    "*.{css,json,md,scss,yaml,yml}": [
+      "prettier --check"
     ],
-    "*.{ts,tsx,js,jsx}": [
-      "yarn lint-fix"
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
+      "eslint"
     ]
   },
   "napi": {

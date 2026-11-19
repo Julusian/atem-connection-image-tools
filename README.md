@@ -10,9 +10,10 @@ This library is intended to be used as optional optimisations for atem-connectio
 ### Example:
 
 ```ts
-import { Atem } from 'atem-connection'
 import * as fs from 'fs'
+
 import { encodeImageForAtem } from '@atem-connection/image-tools'
+import { Atem } from 'atem-connection'
 
 const conn = new Atem()
 
