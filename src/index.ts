@@ -1,7 +1,7 @@
-import * as crypto from 'crypto'
+import * as crypto from 'node:crypto'
 
-import { UploadBufferInfo } from './copy.js'
 import { Native } from './nativeLoader.js'
+import type { UploadBufferInfo } from './copy.js'
 
 export { NativeError } from './nativeLoader.js'
 

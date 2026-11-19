@@ -35,7 +35,7 @@ conn.uploadStill(1, file, 'Test image', '').then(() => {
 ### Setting up
 
 - Clone the repository
-- Install a compatible version of nodejs and yarn
+- Install a compatible version of nodejs (`^22.16 || >=24`), and enable yarn with `corepack enable`
 - Install the rust compiler with [rustup](https://rustup.rs/)
 - Build the project with `yarn build`
 - You can use [`yarn link`](https://yarnpkg.com/cli/link) to link this into `atem-connection`
@@ -50,4 +50,4 @@ There are some rust unit tests, which can be run with `yarn unit:rs`, or you can
 
 You can run `yarn build:js` to rebuild the typescript code, optionally with the `--watch` parameter to re-run upon saving a file.
 
-There are some unit tests, which can be run with `yarn unit:js`. This command calls into jest, so any jest arguments can also be used
+There are some unit tests, which can be run with `yarn unit:js`. This command calls into vitest, so any vitest arguments can also be used

@@ -197,4 +197,4 @@ Cargo.lock
 *.node
 
 perf.data*
-nativeLib.d.ts
+nativeLib.d.cts

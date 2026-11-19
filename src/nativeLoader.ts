@@ -1,9 +1,12 @@
-let Native: typeof import('../nativeLib') | undefined
+import { createRequire } from 'node:module'
+
+const require = createRequire(import.meta.url)
+
+let Native: typeof import('../nativeLib.cjs') | undefined
 let NativeError: Error | undefined
 
 try {
-	// eslint-disable-next-line @typescript-eslint/no-require-imports
-	Native = require('../nativeLib') as typeof import('../nativeLib')
+	Native = require('../nativeLib.cjs') as typeof import('../nativeLib.cjs')
 } catch (e: any) {
 	NativeError = e
 }

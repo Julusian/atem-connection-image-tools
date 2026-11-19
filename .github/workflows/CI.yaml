@@ -79,7 +79,7 @@ jobs:
               yarn build:rs --target armv7-unknown-linux-gnueabihf
               arm-linux-gnueabihf-strip *.node
 
-    name: Build - ${{ matrix.settings.target }} - node@18
+    name: Build - ${{ matrix.settings.target }} - node@22
     runs-on: ${{ matrix.settings.host }}
     steps:
       - uses: actions/checkout@v7
@@ -87,7 +87,7 @@ jobs:
         uses: actions/setup-node@v7
         if: ${{ !matrix.settings.docker }}
         with:
-          node-version: 18
+          node-version: 22
           check-latest: true
       - name: Install rust
         # version and components are defined in rust-toolchain.toml
@@ -127,7 +127,7 @@ jobs:
         uses: actions/setup-node@v7
         if: matrix.settings.target == 'i686-pc-windows-msvc'
         with:
-          node-version: 18
+          node-version: 22
           check-latest: true
           architecture: x86
       - name: Build in docker
@@ -147,7 +147,7 @@ jobs:
           name: bindings-${{ matrix.settings.target }}
           path: |
             ${{ env.APP_NAME }}.*.node
-            nativeLib.d.ts
+            nativeLib.d.cts
           if-no-files-found: error
 
   test-macOS-windows-binding:
@@ -168,20 +168,9 @@ jobs:
             target: aarch64-apple-darwin
             architecture: arm64
         node:
-          - '16'
-          - '18'
-          - '20'
           - '22'
           - '24'
           - '26'
-        exclude:
-          # Node.js has no native Windows arm64 binaries before v20
-          - settings:
-              target: aarch64-pc-windows-msvc
-            node: '16'
-          - settings:
-              target: aarch64-pc-windows-msvc
-            node: '18'
     runs-on: ${{ matrix.settings.host }}
     steps:
       - uses: actions/checkout@v7
@@ -224,10 +213,6 @@ jobs:
           - host: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
         node:
-          - '14'
-          - '16'
-          - '18'
-          - '20'
           - '22'
           - '24'
           - '26'
@@ -265,10 +250,6 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          - '14'
-          - '16'
-          - '18'
-          - '20'
           - '22'
           - '24'
           - '26'
@@ -325,11 +306,6 @@ jobs:
           npm install -g corepack
           corepack enable
         shell: bash
-      - name: Enable corepack
-        run: |
-          npm install -g corepack
-          corepack enable
-        shell: bash
       - name: Install dependencies
         run: yarn install
       - name: Download all artifacts
@@ -338,9 +314,9 @@ jobs:
           path: artifacts
       - name: Move artifacts
         run: |
-          # take a copy of one of the `nativeLib.d.ts` files
-          mv artifacts/bindings-x86_64-unknown-linux-gnu/nativeLib.d.ts ./
-          rm artifacts/*/nativeLib.d.ts
+          # take a copy of one of the `nativeLib.d.cts` files
+          mv artifacts/bindings-x86_64-unknown-linux-gnu/nativeLib.d.cts ./
+          rm artifacts/*/nativeLib.d.cts
 
           mkdir prebuilds
           mv artifacts/*/* prebuilds/

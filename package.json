@@ -2,6 +2,7 @@
   "name": "@atem-connection/image-tools",
   "version": "1.1.2",
   "description": "Native tools for atem-connection",
+  "type": "module",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "license": "MIT",
@@ -24,8 +25,8 @@
     "prepack": "pinst --disable",
     "postpack": "pinst --enable",
     "build": "yarn build:rs && yarn build:js",
-    "build:rs": "napi build --cargo-cwd native --platform --release --js=false --dts nativeLib.d.ts .",
-    "build:rs:debug": "napi build --cargo-cwd native --platform --js=false --dts nativeLib.d.ts .",
+    "build:rs": "napi build --cargo-cwd native --platform --release --js=false --dts nativeLib.d.cts .",
+    "build:rs:debug": "napi build --cargo-cwd native --platform --js=false --dts nativeLib.d.cts .",
     "build:js": "rimraf dist && run build:main --force",
     "build:main": "tsc --build tsconfig.json",
     "lint:eslint": "eslint .",
@@ -44,7 +45,7 @@
     "license-validate": "sofie-licensecheck --allowPackages caniuse-lite@1.0.30001319"
   },
   "engines": {
-    "node": "^14.18 || ^16.14 || >=18.0"
+    "node": "^22.16 || >=24"
   },
   "files": [
     "/dist",
