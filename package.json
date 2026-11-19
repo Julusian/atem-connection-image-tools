@@ -29,10 +29,10 @@
     "lint": "run lint:raw .",
     "lint-fix": "run lint --fix",
     "unit": "run unit:js && run unit:rs",
-    "unit:js": "run jest --forceExit",
+    "unit:js": "vitest run",
     "unit:rs": "cd native && cargo test",
     "test": "run lint && run unit",
-    "watch": "run jest --watch",
+    "watch": "vitest",
     "release": "sofie-version",
     "reset": "git clean -dfx && git reset --hard && yarn",
     "validate:dependencies": "yarn npm audit --environment production && run license-validate",
@@ -57,13 +57,11 @@
   "devDependencies": {
     "@napi-rs/cli": "^2.18.4",
     "@sofie-automation/code-standard-preset": "~2.5.2",
-    "@types/jest": "^29.5.14",
     "@types/node": "^14.18.63",
-    "jest": "^29.7.0",
-    "jest-extended": "^3.2.4",
     "rimraf": "^5.0.10",
-    "ts-jest": "^29.4.11",
-    "typescript": "~5.2.2"
+    "typescript": "~5.2.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
   },
   "prettier": "@sofie-automation/code-standard-preset/.prettierrc.json",
   "lint-staged": {
