@@ -26,45 +26,27 @@ jobs:
         settings:
           - host: macos-latest
             target: x86_64-apple-darwin
-            build: |
-              yarn build:rs --target x86_64-apple-darwin
-              strip -x *.node
+            build: yarn build:rs --target x86_64-apple-darwin
+          - host: macos-latest
+            target: aarch64-apple-darwin
+            build: yarn build:rs --target aarch64-apple-darwin
 
           - host: windows-latest
-            build: yarn build:rs
             target: x86_64-pc-windows-msvc
+            build: yarn build:rs --target x86_64-pc-windows-msvc
           - host: windows-latest
-            build: yarn build:rs --target aarch64-pc-windows-msvc
             target: aarch64-pc-windows-msvc
+            build: yarn build:rs --target aarch64-pc-windows-msvc
 
           - host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
-            build: |-
-              set -e &&
-              corepack enable &&
-              yarn build:rs --target x86_64-unknown-linux-gnu &&
-              strip *.node
-          - host: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
-            build: set -e && corepack enable && yarn build:rs && strip *.node
-
-          - host: macos-latest
-            target: aarch64-apple-darwin
-            build: |
-              yarn build:rs --target aarch64-apple-darwin
-              strip -x *.node
-
+            build: yarn build:rs --target x86_64-unknown-linux-gnu --use-napi-cross
           - host: ubuntu-latest
             target: aarch64-unknown-linux-gnu
-            docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-aarch64
-            build: |-
-              set -e &&
-              corepack enable &&
-              rustup target add aarch64-unknown-linux-gnu &&
-              yarn build:rs --target aarch64-unknown-linux-gnu &&
-              aarch64-unknown-linux-gnu-strip *.node
+            build: yarn build:rs --target aarch64-unknown-linux-gnu --use-napi-cross
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            build: yarn build:rs --target x86_64-unknown-linux-musl -x
 
     name: Build - ${{ matrix.settings.target }} - node@22
     runs-on: ${{ matrix.settings.host }}
@@ -72,13 +54,11 @@ jobs:
       - uses: actions/checkout@v7
       - name: Setup node
         uses: actions/setup-node@v7
-        if: ${{ !matrix.settings.docker }}
         with:
           node-version: 22
           check-latest: true
       - name: Install rust
         # version and components are defined in rust-toolchain.toml
-        if: ${{ !matrix.settings.docker }}
         run: rustup toolchain install && rustup target add ${{ matrix.settings.target }}
         shell: bash
       - name: Cache cargo
@@ -88,9 +68,20 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            .cargo-cache
-            target/
+            native/target/
           key: ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}
+      - name: Install zig
+        if: ${{ contains(matrix.settings.target, 'musl') }}
+        run: |
+          curl -sSfL https://ziglang.org/download/${ZIG_VERSION}/zig-x86_64-linux-${ZIG_VERSION}.tar.xz | tar -xJ -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/zig-x86_64-linux-${ZIG_VERSION}" >> "$GITHUB_PATH"
+        env:
+          ZIG_VERSION: 0.15.2
+      - name: Install cargo-zigbuild
+        if: ${{ contains(matrix.settings.target, 'musl') }}
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-zigbuild
       - name: Enable corepack
         run: |
           npm install -g --force corepack
@@ -98,16 +89,8 @@ jobs:
         shell: bash
       - name: Install dependencies
         run: yarn install
-      - name: Build in docker
-        uses: addnab/docker-run-action@v3
-        if: ${{ matrix.settings.docker }}
-        with:
-          image: ${{ matrix.settings.docker }}
-          options: '--user 0:0 -v ${{ github.workspace }}/.cargo-cache/git/db:/usr/local/cargo/git/db -v ${{ github.workspace }}/.cargo/registry/cache:/usr/local/cargo/registry/cache -v ${{ github.workspace }}/.cargo/registry/index:/usr/local/cargo/registry/index -v ${{ github.workspace }}:/build -w /build'
-          run: ${{ matrix.settings.build }}
       - name: Build
         run: ${{ matrix.settings.build }}
-        if: ${{ !matrix.settings.docker }}
         shell: bash
       - name: Upload artifact
         uses: actions/upload-artifact@v7
@@ -208,7 +191,9 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim sh -c "npm install -g --force corepack && corepack enable && yarn build:js" && yarn unit
+        run: |
+          yarn build:js
+          yarn unit
 
   test-linux-x64-musl-binding:
     name: Test on x86_64-unknown-linux-musl - node@${{ matrix.node }}
@@ -244,7 +229,10 @@ jobs:
         run: ls -R .
         shell: bash
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-alpine sh -c "npm install -g --force corepack && corepack enable && yarn build:js" && yarn unit
+        # node_modules were installed for musl, so the js tests must run inside the alpine container
+        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-alpine sh -c "npm install -g --force corepack && corepack enable && yarn build:js && yarn unit:js"
+      - name: Test rust
+        run: yarn unit:rs
 
   publish:
     name: Release

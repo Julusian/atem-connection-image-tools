@@ -18,3 +18,4 @@ napi-build = "2.6.0"
 
 [profile.release]
 lto = true
+strip = "symbols"
