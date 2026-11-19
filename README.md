@@ -30,6 +30,19 @@ conn.uploadStill(1, file, 'Test image', '').then(() => {
 })
 ```
 
+### Async methods
+
+`encodeImageForAtem` and `decodeImageFromAtem` run synchronously, which blocks the event loop while converting (a few tens of milliseconds for a UHD image).
+
+`encodeImageForAtemAsync` and `decodeImageFromAtemAsync` perform the same work on the libuv threadpool instead, and return a promise. The input buffer must not be modified until the promise has settled.
+
+The threadpool is shared with other node apis (such as `fs` and `zlib`), and defaults to 4 threads. If you are converting lots of images at once, you may want to increase this with the `UV_THREADPOOL_SIZE` environment variable.
+
+```ts
+const encodedImage = await encodeImageForAtemAsync(1920, 1080, file, 'rgba')
+await conn.uploadStill(0, encodedImage, 'Test image', '')
+```
+
 ## Development
 
 ### Setting up

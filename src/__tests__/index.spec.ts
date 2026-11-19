@@ -1,6 +1,28 @@
 import { describe, expect, test } from 'vitest'
 
-import { decodeImageFromAtem, encodeImageForAtem, NativeError } from '../index.js'
+import {
+	decodeImageFromAtem,
+	decodeImageFromAtemAsync,
+	encodeImageForAtem,
+	encodeImageForAtemAsync,
+	NativeError,
+} from '../index.js'
+
+function createTestImage(width: number, height: number): Buffer {
+	const input = Buffer.alloc(width * height * 4)
+	for (let i = 0; i < input.length; i++) {
+		input[i] = (i * 37) & 0xff
+	}
+	return input
+}
+
+function createFlatImage(width: number, height: number): Buffer {
+	const input = Buffer.alloc(width * height * 4)
+	for (let i = 0; i < width * height; i++) {
+		input.writeUInt32BE(0x7f7f7fff, i * 4) // mid grey, opaque
+	}
+	return input
+}
 
 describe('native', () => {
 	test('loads', () => {
@@ -10,10 +32,7 @@ describe('native', () => {
 	test('encode and decode roundtrip', () => {
 		const width = 8
 		const height = 2
-		const input = Buffer.alloc(width * height * 4)
-		for (let i = 0; i < width * height; i++) {
-			input.writeUInt32BE(0x7f7f7fff, i * 4) // mid grey, opaque
-		}
+		const input = createFlatImage(width, height)
 
 		const encoded = encodeImageForAtem(width, height, input, 'rgba')
 		expect(encoded.encodedData.length).toBe(width * height * 4)
@@ -30,5 +49,72 @@ describe('native', () => {
 
 	test('rejects incorrect buffer length', () => {
 		expect(() => encodeImageForAtem(4, 4, Buffer.alloc(10), 'rgba')).toThrow(/incorrect length/)
+	})
+
+	test('rejects too little data to decode', () => {
+		expect(() => decodeImageFromAtem(8, 2, Buffer.alloc(32))).toThrow(/less data than expected/)
+	})
+})
+
+describe('hash', () => {
+	test('is 16 bytes of base64', () => {
+		const encoded = encodeImageForAtem(8, 2, createTestImage(8, 2), 'rgba')
+		expect(Buffer.from(encoded.hash ?? '', 'base64').length).toBe(16)
+	})
+
+	test('is stable, and changes with the content', () => {
+		const a = encodeImageForAtem(8, 2, createTestImage(8, 2), 'rgba')
+		const b = encodeImageForAtem(8, 2, createTestImage(8, 2), 'rgba')
+		const c = encodeImageForAtem(8, 2, createFlatImage(8, 2), 'rgba')
+		expect(a.hash).toBe(b.hash)
+		expect(a.hash).not.toBe(c.hash)
+	})
+})
+
+describe('async', () => {
+	// Large enough to use BT.709
+	const width = 1280
+	const height = 720
+
+	test('encode matches sync', async () => {
+		const input = createTestImage(width, height)
+
+		const syncResult = encodeImageForAtem(width, height, input, 'rgba')
+		const asyncResult = await encodeImageForAtemAsync(width, height, input, 'rgba')
+
+		expect(asyncResult).toEqual(syncResult)
+	})
+
+	test('decode matches sync', async () => {
+		const encoded = encodeImageForAtem(width, height, createTestImage(width, height), 'rgba').encodedData
+
+		const syncResult = decodeImageFromAtem(width, height, encoded)
+		const asyncResult = await decodeImageFromAtemAsync(width, height, encoded)
+
+		expect(asyncResult.equals(syncResult)).toBe(true)
+	})
+
+	test('encode rejects incorrect buffer length', async () => {
+		await expect(encodeImageForAtemAsync(4, 4, Buffer.alloc(10), 'rgba')).rejects.toThrow(/incorrect length/)
+	})
+
+	test('decode rejects invalid width', async () => {
+		await expect(decodeImageFromAtemAsync(4, 4, Buffer.alloc(64))).rejects.toThrow(/multiple of 8/)
+	})
+
+	test('decode rejects too little data', async () => {
+		await expect(decodeImageFromAtemAsync(8, 2, Buffer.alloc(32))).rejects.toThrow(/less data than expected/)
+	})
+
+	test('runs concurrently', async () => {
+		const input = createTestImage(width, height)
+		const expected = encodeImageForAtem(width, height, input, 'rgba')
+
+		const results = await Promise.all(
+			Array.from({ length: 8 }, async () => encodeImageForAtemAsync(width, height, input, 'rgba'))
+		)
+		for (const result of results) {
+			expect(result).toEqual(expected)
+		}
 	})
 })
