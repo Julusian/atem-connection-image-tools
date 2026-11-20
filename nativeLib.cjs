@@ -31,134 +31,139 @@ function isMusl() {
 	}
 }
 
-switch (platform) {
-	case 'android':
-		switch (arch) {
-			case 'arm64':
-				try {
-					nativeBinding = runtimeRequire('atem-connection-image-tools.android-arm64.node')
-				} catch (e) {
-					loadError = e
-				}
-				break
-			case 'arm':
-				try {
-					nativeBinding = runtimeRequire('atem-connection-image-tools.android-arm-eabi.node')
-				} catch (e) {
-					loadError = e
-				}
-				break
-			default:
-				loadError = new Error(`Unsupported architecture on Android ${arch}`)
-		}
-		break
-	case 'win32':
-		switch (arch) {
-			case 'x64':
-				try {
-					nativeBinding = runtimeRequire('atem-connection-image-tools.win32-x64-msvc.node')
-				} catch (e) {
-					loadError = e
-				}
-				break
-			case 'ia32':
-				try {
-					nativeBinding = runtimeRequire('atem-connection-image-tools.win32-ia32-msvc.node')
-				} catch (e) {
-					loadError = e
-				}
-				break
-			case 'arm64':
-				try {
-					nativeBinding = runtimeRequire('atem-connection-image-tools.win32-arm64-msvc.node')
-				} catch (e) {
-					loadError = e
-				}
-				break
-			default:
-				loadError = new Error(`Unsupported architecture on Windows: ${arch}`)
-		}
-		break
-	case 'darwin':
-		try {
-			nativeBinding = runtimeRequire('atem-connection-image-tools.darwin-universal.node')
-			if (nativeBinding) break
-		} catch {}
-		switch (arch) {
-			case 'x64':
-				try {
-					nativeBinding = runtimeRequire('atem-connection-image-tools.darwin-x64.node')
-				} catch (e) {
-					loadError = e
-				}
-				break
-			case 'arm64':
-				try {
-					nativeBinding = runtimeRequire('atem-connection-image-tools.darwin-arm64.node')
-				} catch (e) {
-					loadError = e
-				}
-				break
-			default:
-				loadError = new Error(`Unsupported architecture on macOS: ${arch}`)
-		}
-		break
-	case 'freebsd':
-		if (arch !== 'x64') {
-			loadError = new Error(`Unsupported architecture on FreeBSD: ${arch}`)
-		} else {
-			try {
-				nativeBinding = runtimeRequire('atem-connection-image-tools.freebsd-x64.node')
-			} catch (e) {
-				loadError = e
+try {
+	switch (platform) {
+		case 'android':
+			switch (arch) {
+				case 'arm64':
+					try {
+						nativeBinding = runtimeRequire('atem-connection-image-tools.android-arm64.node')
+					} catch (e) {
+						loadError = e
+					}
+					break
+				case 'arm':
+					try {
+						nativeBinding = runtimeRequire('atem-connection-image-tools.android-arm-eabi.node')
+					} catch (e) {
+						loadError = e
+					}
+					break
+				default:
+					loadError = new Error(`Unsupported architecture on Android ${arch}`)
 			}
-		}
-		break
-	case 'linux':
-		switch (arch) {
-			case 'x64':
-				if (isMusl()) {
+			break
+		case 'win32':
+			switch (arch) {
+				case 'x64':
 					try {
-						nativeBinding = runtimeRequire('atem-connection-image-tools.linux-x64-musl.node')
+						nativeBinding = runtimeRequire('atem-connection-image-tools.win32-x64-msvc.node')
 					} catch (e) {
 						loadError = e
 					}
-				} else {
+					break
+				case 'ia32':
 					try {
-						nativeBinding = runtimeRequire('atem-connection-image-tools.linux-x64-gnu.node')
+						nativeBinding = runtimeRequire('atem-connection-image-tools.win32-ia32-msvc.node')
 					} catch (e) {
 						loadError = e
 					}
-				}
-				break
-			case 'arm64':
-				if (isMusl()) {
+					break
+				case 'arm64':
 					try {
-						nativeBinding = runtimeRequire('atem-connection-image-tools.linux-arm64-musl.node')
+						nativeBinding = runtimeRequire('atem-connection-image-tools.win32-arm64-msvc.node')
 					} catch (e) {
 						loadError = e
 					}
-				} else {
+					break
+				default:
+					loadError = new Error(`Unsupported architecture on Windows: ${arch}`)
+			}
+			break
+		case 'darwin':
+			try {
+				nativeBinding = runtimeRequire('atem-connection-image-tools.darwin-universal.node')
+				if (nativeBinding) break
+			} catch {}
+			switch (arch) {
+				case 'x64':
 					try {
-						nativeBinding = runtimeRequire('atem-connection-image-tools.linux-arm64-gnu.node')
+						nativeBinding = runtimeRequire('atem-connection-image-tools.darwin-x64.node')
 					} catch (e) {
 						loadError = e
 					}
-				}
-				break
-			case 'arm':
+					break
+				case 'arm64':
+					try {
+						nativeBinding = runtimeRequire('atem-connection-image-tools.darwin-arm64.node')
+					} catch (e) {
+						loadError = e
+					}
+					break
+				default:
+					loadError = new Error(`Unsupported architecture on macOS: ${arch}`)
+			}
+			break
+		case 'freebsd':
+			if (arch !== 'x64') {
+				loadError = new Error(`Unsupported architecture on FreeBSD: ${arch}`)
+			} else {
 				try {
-					nativeBinding = runtimeRequire('atem-connection-image-tools.linux-arm-gnueabihf.node')
+					nativeBinding = runtimeRequire('atem-connection-image-tools.freebsd-x64.node')
 				} catch (e) {
 					loadError = e
 				}
-				break
-			default:
-				loadError = new Error(`Unsupported architecture on Linux: ${arch}`)
-		}
-		break
-	default:
-		loadError = new Error(`Unsupported OS: ${platform}, architecture: ${arch}`)
+			}
+			break
+		case 'linux':
+			switch (arch) {
+				case 'x64':
+					if (isMusl()) {
+						try {
+							nativeBinding = runtimeRequire('atem-connection-image-tools.linux-x64-musl.node')
+						} catch (e) {
+							loadError = e
+						}
+					} else {
+						try {
+							nativeBinding = runtimeRequire('atem-connection-image-tools.linux-x64-gnu.node')
+						} catch (e) {
+							loadError = e
+						}
+					}
+					break
+				case 'arm64':
+					if (isMusl()) {
+						try {
+							nativeBinding = runtimeRequire('atem-connection-image-tools.linux-arm64-musl.node')
+						} catch (e) {
+							loadError = e
+						}
+					} else {
+						try {
+							nativeBinding = runtimeRequire('atem-connection-image-tools.linux-arm64-gnu.node')
+						} catch (e) {
+							loadError = e
+						}
+					}
+					break
+				case 'arm':
+					try {
+						nativeBinding = runtimeRequire('atem-connection-image-tools.linux-arm-gnueabihf.node')
+					} catch (e) {
+						loadError = e
+					}
+					break
+				default:
+					loadError = new Error(`Unsupported architecture on Linux: ${arch}`)
+			}
+			break
+		default:
+			loadError = new Error(`Unsupported OS: ${platform}, architecture: ${arch}`)
+	}
+} catch (e) {
+	// Catch anything unexpected, so that importing this file can never throw
+	loadError = e
 }
 
 // Errors are returned rather than thrown, so that this file can be imported statically (allowing bundlers to
