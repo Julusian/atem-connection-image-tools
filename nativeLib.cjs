@@ -49,7 +49,7 @@ switch (platform) {
 				}
 				break
 			default:
-				throw new Error(`Unsupported architecture on Android ${arch}`)
+				loadError = new Error(`Unsupported architecture on Android ${arch}`)
 		}
 		break
 	case 'win32':
@@ -76,7 +76,7 @@ switch (platform) {
 				}
 				break
 			default:
-				throw new Error(`Unsupported architecture on Windows: ${arch}`)
+				loadError = new Error(`Unsupported architecture on Windows: ${arch}`)
 		}
 		break
 	case 'darwin':
@@ -100,17 +100,18 @@ switch (platform) {
 				}
 				break
 			default:
-				throw new Error(`Unsupported architecture on macOS: ${arch}`)
+				loadError = new Error(`Unsupported architecture on macOS: ${arch}`)
 		}
 		break
 	case 'freebsd':
 		if (arch !== 'x64') {
-			throw new Error(`Unsupported architecture on FreeBSD: ${arch}`)
-		}
-		try {
-			nativeBinding = runtimeRequire('atem-connection-image-tools.freebsd-x64.node')
-		} catch (e) {
-			loadError = e
+			loadError = new Error(`Unsupported architecture on FreeBSD: ${arch}`)
+		} else {
+			try {
+				nativeBinding = runtimeRequire('atem-connection-image-tools.freebsd-x64.node')
+			} catch (e) {
+				loadError = e
+			}
 		}
 		break
 	case 'linux':
@@ -153,18 +154,15 @@ switch (platform) {
 				}
 				break
 			default:
-				throw new Error(`Unsupported architecture on Linux: ${arch}`)
+				loadError = new Error(`Unsupported architecture on Linux: ${arch}`)
 		}
 		break
 	default:
-		throw new Error(`Unsupported OS: ${platform}, architecture: ${arch}`)
+		loadError = new Error(`Unsupported OS: ${platform}, architecture: ${arch}`)
 }
 
-if (!nativeBinding) {
-	if (loadError) {
-		throw loadError
-	}
-	throw new Error(`Failed to load native binding`)
-}
-
+// Errors are returned rather than thrown, so that this file can be imported statically (allowing bundlers to
+// follow it) while still letting the native library be optional
 module.exports = nativeBinding
+	? { binding: nativeBinding, error: undefined }
+	: { binding: undefined, error: loadError || new Error(`Failed to load native binding`) }
