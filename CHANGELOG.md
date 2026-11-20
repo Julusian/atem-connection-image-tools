@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) for commit guidelines.
 
+## [2.0.1](https://github.com/Julusian/atem-connection-image-tools/compare/v2.0.0...v2.0.1) (Fri Nov 20 2026)
+
+
+### Fixes
+
+* add exports field to package.json [488adb9](https://github.com/Julusian/atem-connection-image-tools/commit/488adb902e6a234906b2eeeeb5c6d37b634442c3)
+* never throw while loading the native library [866d9ba](https://github.com/Julusian/atem-connection-image-tools/commit/866d9bac0d41a4e50805f34b3ce56d52358a1290)
+* allow bundlers to follow the native loader [5fbe253](https://github.com/Julusian/atem-connection-image-tools/commit/5fbe25301f8d3838d8dd6132acb2252370294cfe)
+
 ## [2.0.0](https://github.com/Julusian/atem-connection-image-tools/compare/v1.1.2...v2.0.0) (Thu Nov 19 2026)
 
 ## Breaking changes
